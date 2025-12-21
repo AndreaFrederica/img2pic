@@ -34,6 +34,7 @@ def _parse_args() -> argparse.Namespace:
     p.add_argument("--gap-tolerance", type=int, default=2, help="Tolerance around gap size (±pixels).")
     p.add_argument("--min-energy", type=float, default=0.15, help="Minimum energy threshold (0~1 of max).")
     p.add_argument("--smooth", type=int, default=3, help="Smoothing window size for 1D profiles.")
+    p.add_argument("--window-size", type=int, default=0, help="Sliding window size for peak detection (0=auto, based on gap-size).")
     
     # visualization
     p.add_argument("--line-color", type=str, default="red", help="Detected line color.")
@@ -105,21 +106,90 @@ def _to_u8_heatmap(e: np.ndarray) -> np.ndarray:
     return (v * 255).astype(np.uint8)
 
 
-def _detect_peaks_1d(profile: np.ndarray, gap_size: int, gap_tolerance: int, min_threshold: float) -> list[int]:
-    """Detect peaks in 1D profile."""
+def _detect_peaks_1d(profile: np.ndarray, gap_size: int, gap_tolerance: int, min_threshold: float, window_size: int = 0) -> list[int]:
+    """Detect peaks in 1D profile using sliding window mechanism.
+    
+    This approach detects both global and local peaks by:
+    1. Using a sliding window of configurable size
+    2. Finding local maxima within each window
+    3. Avoiding duplicate detection across windows
+    
+    Args:
+        profile: 1D energy profile
+        gap_size: Expected gap between peaks
+        gap_tolerance: Tolerance for gap spacing
+        min_threshold: Minimum energy threshold (0~1 of max)
+        window_size: Sliding window size (0=auto, uses gap_size)
+    """
     if profile.max() == 0:
         return []
     
     threshold = min_threshold * profile.max()
     peaks = []
-    for i in range(1, len(profile) - 1):
-        if (profile[i] > profile[i-1] and 
-            profile[i] > profile[i+1] and 
-            profile[i] >= threshold):
-            peaks.append(i)
+    
+    # Sliding window approach: window size configurable
+    if window_size <= 0:
+        window_size = max(gap_size, 5)
+    window_size = max(window_size, 5)
+    step = max(1, gap_size // 2)  # Overlap windows by 50%
+    
+    detected_peaks = set()
+    
+    # Slide window across profile
+    for start in range(0, len(profile) - window_size + 1, step):
+        end = min(start + window_size, len(profile))
+        window = profile[start:end]
+        
+        # Find local maximum in this window
+        if window.max() >= threshold:
+            local_max_idx = np.argmax(window)
+            peak_pos = start + local_max_idx
+            
+            # Check if this is a local maximum (not just window maximum)
+            is_local_max = True
+            if peak_pos > 0 and profile[peak_pos] <= profile[peak_pos - 1]:
+                is_local_max = False
+            if peak_pos < len(profile) - 1 and profile[peak_pos] <= profile[peak_pos + 1]:
+                is_local_max = False
+            
+            if is_local_max:
+                detected_peaks.add(peak_pos)
+    
+    # Also check edges and remaining area
+    if len(profile) > window_size:
+        start = len(profile) - window_size
+        end = len(profile)
+        window = profile[start:end]
+        if window.max() >= threshold:
+            local_max_idx = np.argmax(window)
+            peak_pos = start + local_max_idx
+            
+            is_local_max = True
+            if peak_pos > 0 and profile[peak_pos] <= profile[peak_pos - 1]:
+                is_local_max = False
+            if peak_pos < len(profile) - 1 and profile[peak_pos] <= profile[peak_pos + 1]:
+                is_local_max = False
+            
+            if is_local_max:
+                detected_peaks.add(peak_pos)
+    
+    peaks = sorted(list(detected_peaks))
     
     if not peaks:
         return []
+    
+    # Refine peak positions by finding the maximum within a small neighborhood
+    refined_peaks = []
+    search_radius = max(1, gap_size // 4)  # Search within ±25% of gap_size
+    for peak in peaks:
+        start = max(0, peak - search_radius)
+        end = min(len(profile), peak + search_radius + 1)
+        neighborhood = profile[start:end]
+        max_idx = np.argmax(neighborhood)
+        refined_peak = start + max_idx
+        refined_peaks.append(refined_peak)
+    
+    peaks = refined_peaks
     
     # Filter peaks by spacing
     filtered_peaks = [peaks[0]]
@@ -139,7 +209,8 @@ def _detect_grid_lines(energy_map: np.ndarray,
                        gap_size: int,
                        gap_tolerance: int,
                        min_energy: float,
-                       smooth: int) -> tuple[list[int], list[int]]:
+                       smooth: int,
+                       window_size: int = 0) -> tuple[list[int], list[int]]:
     """Detect grid lines from energy map."""
     h, w = energy_map.shape[:2]
     
@@ -159,8 +230,8 @@ def _detect_grid_lines(energy_map: np.ndarray,
         y_profile = cv2.filter2D(y_profile, -1, kernel[0, :])
     
     # Detect peaks
-    x_lines = _detect_peaks_1d(x_profile, gap_size, gap_tolerance, min_energy)
-    y_lines = _detect_peaks_1d(y_profile, gap_size, gap_tolerance, min_energy)
+    x_lines = _detect_peaks_1d(x_profile, gap_size, gap_tolerance, min_energy, window_size)
+    y_lines = _detect_peaks_1d(y_profile, gap_size, gap_tolerance, min_energy, window_size)
     
     return x_lines, y_lines
 
@@ -419,7 +490,8 @@ def main() -> None:
         gap_size=pixel_size,
         gap_tolerance=int(args.gap_tolerance),
         min_energy=float(args.min_energy),
-        smooth=int(args.smooth)
+        smooth=int(args.smooth),
+        window_size=int(args.window_size)
     )
     
     print(f"Detected X lines: {len(x_lines)}")

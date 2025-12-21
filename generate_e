@@ -1,0 +1,85 @@
+#!/usr/bin/env python
+"""
+Extract and save gradient energy map from image.
+Standalone script to generate energy maps for grid detection.
+"""
+from __future__ import annotations
+
+import argparse
+from pathlib import Path
+
+import numpy as np
+from PIL import Image
+import cv2
+
+
+def _parse_args() -> argparse.Namespace:
+    p = argparse.ArgumentParser(
+        description="Generate gradient energy map from image."
+    )
+    p.add_argument("--in", dest="input_path", required=True, help="Input image path.")
+    p.add_argument("--out", dest="output_path", help="Output energy map path. Default: out/<name>_grad_energy.png")
+    p.add_argument("--sigma", type=float, default=1.0, help="Gaussian blur sigma before gradients.")
+    
+    return p.parse_args()
+
+
+def _resolve_output_path(input_path: Path, output_path: str | None) -> Path:
+    if output_path:
+        return Path(output_path)
+    return Path("out") / f"{input_path.stem}_grad_energy.png"
+
+
+def _grad_energy(gray_u8: np.ndarray, sigma: float) -> np.ndarray:
+    """
+    Compute gradient energy map.
+    Returns: energy map (float32, same shape as input)
+    """
+    g = gray_u8.astype(np.float32) / 255.0
+    if sigma > 0:
+        g = cv2.GaussianBlur(g, ksize=(0, 0), sigmaX=sigma, sigmaY=sigma)
+    gx = cv2.Sobel(g, cv2.CV_32F, 1, 0, ksize=3)
+    gy = cv2.Sobel(g, cv2.CV_32F, 0, 1, ksize=3)
+    return np.abs(gx) + np.abs(gy)
+
+
+def _to_u8_heatmap(e: np.ndarray) -> np.ndarray:
+    """
+    Convert energy map to uint8 heatmap for visualization.
+    """
+    v = e.astype(np.float32)
+    v = v / (np.quantile(v, 0.99) + 1e-6)
+    v = np.clip(v, 0, 1)
+    return (v * 255).astype(np.uint8)
+
+
+def main() -> None:
+    args = _parse_args()
+    input_path = Path(args.input_path)
+    if not input_path.exists():
+        raise SystemExit(f"Input not found: {input_path}")
+    
+    output_path = _resolve_output_path(input_path, args.output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    
+    # Load image
+    rgb = np.array(Image.open(input_path).convert("RGB"))
+    gray = cv2.cvtColor(rgb, cv2.COLOR_RGB2GRAY)
+    
+    # Compute energy
+    energy = _grad_energy(gray, sigma=float(args.sigma))
+    
+    # Convert to uint8 heatmap
+    energy_u8 = _to_u8_heatmap(energy)
+    
+    # Save
+    Image.fromarray(energy_u8).save(output_path)
+    
+    print(f"Input: {input_path}")
+    print(f"Energy map shape: {energy.shape}")
+    print(f"Energy range: [{energy.min():.4f}, {energy.max():.4f}]")
+    print(f"Saved: {output_path}")
+
+
+if __name__ == "__main__":
+    main()

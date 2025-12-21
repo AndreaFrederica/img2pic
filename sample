@@ -1,0 +1,10 @@
+#!/usr/bin/env python
+"""
+Quick wrapper for sample_from_grid_centers.py
+"""
+import subprocess
+import sys
+
+if __name__ == "__main__":
+    cmd = ["python", "sample_from_grid_centers.py"] + sys.argv[1:]
+    subprocess.run(cmd)
