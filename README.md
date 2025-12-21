@@ -173,7 +173,7 @@ python edge_detect_pixelize.py --in input.png --debug
 | 网格插值 | ✅ | ❌ |
 | 方向性增强 | ✅ | ❌ |
 | 多种采样模式 | ✅ | ❌ |
-| 颜色量化 | ❌ | ✅ |
+| 颜色量化 | ✅ | ✅ |
 
 ## 适用场景
 
