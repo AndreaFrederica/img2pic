@@ -108,6 +108,12 @@ python energ --in input.png \
   --quantize \
   --quantize-mode smart \
   --colors 32
+
+# 调整相似度阈值（默认0.8）
+python energ --in input.png --sample --quantize --similarity-threshold 0.9
+
+# 强制16色调色板，高相似度阈值（减少颜色合并）
+python energ --in input.png --sample --quantize --colors 16 --similarity-threshold 0.95
 ```
 
 #### 主要参数说明
