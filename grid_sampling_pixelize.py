@@ -61,6 +61,12 @@ def _parse_args() -> argparse.Namespace:
         help="Skip palette quantization.",
     )
     parser.add_argument(
+        "--color-threshold",
+        type=float,
+        default=0.0,
+        help="Color similarity threshold (0.0-1.0). Higher = more aggressive color merging. 0 = disabled.",
+    )
+    parser.add_argument(
         "--debug",
         action="store_true",
         help="Save debug images showing detected grid and sampling points.",
@@ -156,6 +162,45 @@ def create_regular_grid_from_irregular(grid_lines: np.ndarray, image_size: int) 
     return regular_grid.astype(int)
 
 
+def merge_similar_colors(image: np.ndarray, threshold: float) -> np.ndarray:
+    """合并相似的颜色"""
+    if threshold <= 0.0:
+        return image  # 不进行颜色合并
+
+    # 将图像重塑为颜色列表
+    height, width = image.shape[:2]
+    pixels = image.reshape(-1, 3)
+
+    # 创建唯一颜色映射
+    unique_colors = {}
+    merged_pixels = pixels.copy()
+
+    # 对每个像素，找到最接近的已存在的颜色或创建新颜色
+    for i, pixel in enumerate(pixels):
+        # 检查是否与已存在的颜色足够相似
+        found_similar = False
+        pixel_float = pixel.astype(float) / 255.0
+
+        for ref_color_key in unique_colors:
+            ref_color = np.array(ref_color_key.split(','), dtype=float)
+            # 计算颜色距离（使用欧氏距离）
+            distance = np.linalg.norm(pixel_float - ref_color)
+
+            if distance <= threshold:
+                # 使用参考颜色
+                merged_pixels[i] = (ref_color * 255).astype(np.uint8)
+                found_similar = True
+                break
+
+        if not found_similar:
+            # 添加为新颜色
+            color_key = f"{pixel_float[0]:.3f},{pixel_float[1]:.3f},{pixel_float[2]:.3f}"
+            unique_colors[color_key] = True
+
+    # 重塑回图像形状
+    return merged_pixels.reshape(height, width, 3)
+
+
 def sample_grid_centers(image: np.ndarray, h_lines: np.ndarray, v_lines: np.ndarray) -> np.ndarray:
     """在每个网格中心采样颜色值"""
     h_centers = (h_lines[:-1] + h_lines[1:]) // 2
@@ -220,6 +265,15 @@ def main() -> None:
     )
 
     print(f"Detected grid: {len(v_grid)-1} x {len(h_grid)-1} pixels")
+
+    # 颜色合并（如果启用）
+    if args.color_threshold > 0.0:
+        print(f"Merging similar colors with threshold: {args.color_threshold}")
+        pixelated = merge_similar_colors(pixelated, args.color_threshold)
+
+        # 统计颜色数量
+        unique_colors = len(np.unique(pixelated.reshape(-1, 3), axis=0))
+        print(f"Unique colors after merging: {unique_colors}")
 
     # 转换回PIL图像
     pixelated_img = Image.fromarray(pixelated)

@@ -1,8 +1,14 @@
 {
     "cSpell.words": [
+        "fromarray",
+        "keepdims",
+        "ksize",
+        "linalg",
         "numpy",
         "opencv",
+        "pixelizing",
         "pypi",
-        "scipy"
+        "scipy",
+        "sobel"
     ]
 }
