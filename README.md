@@ -273,4 +273,4 @@ def _detect_pixel_size(energy, min_s, max_s):
 
 ## 许可证
 
-本项目采用 MIT 许可证。
+本项目采用 MPL2.0 许可证。
