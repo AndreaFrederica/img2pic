@@ -74,11 +74,19 @@ watch(locale, (newLocale) => {
 const languageOptions = [
   { value: 'zh-CN', label: '简体中文' },
   { value: 'zh-TW', label: '繁體中文' },
+  { value: 'zh-classical', label: '文言文' },
   { value: 'ja', label: '日本語' },
   { value: 'ja-h', label: '日本語漢字' },
   { value: 'en', label: 'English' },
+  { value: 'es', label: 'Español' },
+  { value: 'de', label: 'Deutsch' },
+  { value: 'it', label: 'Italiano' },
+  { value: 'pt', label: 'Português' },
   { value: 'fr', label: 'Français' },
   { value: 'ru', label: 'Русский' },
+  { value: 'ko', label: '한국어' },
+  { value: 'ar', label: 'العربية' },
+  { value: 'hi', label: 'हिन्दी' },
 ];
 
 const linksList = computed<EssentialLinkProps[]>(() => [

@@ -33,7 +33,12 @@
 
                   <!-- 基础参数 -->
                   <div class="q-mb-md">
-                    <div class="text-body2 q-mb-sm">{{ $t('pixelParams.gaussianBlur') }}: {{ params.sigma.toFixed(1) }}</div>
+                    <div class="text-body2 q-mb-sm">
+                      {{ $t('pixelParams.gaussianBlur') }}: {{ params.sigma.toFixed(1) }}
+                      <q-icon name="help" size="xs" color="primary" class="cursor-pointer">
+                        <q-tooltip>{{ $t('pixelParams.gaussianBlurDesc') }}</q-tooltip>
+                      </q-icon>
+                    </div>
                     <q-slider
                       v-model="params.sigma"
                       :min="0"
@@ -46,7 +51,12 @@
                   </div>
 
                 <div class="q-mb-md">
-                  <div class="text-body2 q-mb-sm">{{ $t('pixelParams.gapTolerance') }}: {{ params.gapTolerance }}</div>
+                  <div class="text-body2 q-mb-sm">
+                    {{ $t('pixelParams.gapTolerance') }}: {{ params.gapTolerance }}
+                    <q-icon name="help" size="xs" color="primary" class="cursor-pointer">
+                      <q-tooltip>{{ $t('pixelParams.gapToleranceDesc') }}</q-tooltip>
+                    </q-icon>
+                  </div>
                   <q-slider
                     v-model="params.gapTolerance"
                     :min="0"
@@ -58,7 +68,12 @@
                 </div>
 
                 <div class="q-mb-md">
-                  <div class="text-body2 q-mb-sm">{{ $t('pixelParams.minEnergyThreshold') }}: {{ params.minEnergy.toFixed(2) }}</div>
+                  <div class="text-body2 q-mb-sm">
+                    {{ $t('pixelParams.minEnergyThreshold') }}: {{ params.minEnergy.toFixed(2) }}
+                    <q-icon name="help" size="xs" color="primary" class="cursor-pointer">
+                      <q-tooltip>{{ $t('pixelParams.minEnergyThresholdDesc') }}</q-tooltip>
+                    </q-icon>
+                  </div>
                   <q-slider
                     v-model="params.minEnergy"
                     :min="0"
@@ -71,7 +86,12 @@
                 </div>
 
                 <div class="q-mb-md">
-                  <div class="text-body2 q-mb-sm">{{ $t('pixelParams.smoothWindowSize') }}: {{ params.smooth }}</div>
+                  <div class="text-body2 q-mb-sm">
+                    {{ $t('pixelParams.smoothWindowSize') }}: {{ params.smooth }}
+                    <q-icon name="help" size="xs" color="primary" class="cursor-pointer">
+                      <q-tooltip>{{ $t('pixelParams.smoothWindowSizeDesc') }}</q-tooltip>
+                    </q-icon>
+                  </div>
                   <q-slider
                     v-model="params.smooth"
                     :min="1"
@@ -85,20 +105,41 @@
                 <!-- 能量增强选项 -->
                 <q-toggle
                   v-model="params.enhanceEnergy"
-                  :label="$t('pixelParams.enableEnergyEnhancement')"
                   class="q-mb-md"
-                />
+                >
+                  <template v-slot:default>
+                    <span class="flex items-center">
+                      {{ $t('pixelParams.enableEnergyEnhancement') }}
+                      <q-icon name="help" size="xs" color="primary" class="cursor-pointer q-ml-xs">
+                        <q-tooltip>{{ $t('pixelParams.enableEnergyEnhancementDesc') }}</q-tooltip>
+                      </q-icon>
+                    </span>
+                  </template>
+                </q-toggle>
 
                 <template v-if="params.enhanceEnergy">
                   <q-toggle
                     v-model="params.enhanceDirectional"
-                    :label="$t('pixelParams.directionalEnhancement')"
                     class="q-mb-md"
-                  />
+                  >
+                    <template v-slot:default>
+                      <span class="flex items-center">
+                        {{ $t('pixelParams.directionalEnhancement') }}
+                        <q-icon name="help" size="xs" color="primary" class="cursor-pointer q-ml-xs">
+                          <q-tooltip>{{ $t('pixelParams.directionalEnhancementDesc') }}</q-tooltip>
+                        </q-icon>
+                      </span>
+                    </template>
+                  </q-toggle>
 
                   <template v-if="params.enhanceDirectional">
                     <div class="q-mb-md">
-                      <div class="text-body2 q-mb-sm">{{ $t('pixelParams.horizontalEnhancement') }}: {{ params.enhanceHorizontal.toFixed(1) }}</div>
+                      <div class="text-body2 q-mb-sm">
+                        {{ $t('pixelParams.horizontalEnhancement') }}: {{ params.enhanceHorizontal.toFixed(1) }}
+                        <q-icon name="help" size="xs" color="primary" class="cursor-pointer">
+                          <q-tooltip>{{ $t('pixelParams.horizontalEnhancementDesc') }}</q-tooltip>
+                        </q-icon>
+                      </div>
                       <q-slider
                         v-model="params.enhanceHorizontal"
                         :min="0.5"
@@ -111,7 +152,12 @@
                     </div>
 
                     <div class="q-mb-md">
-                      <div class="text-body2 q-mb-sm">{{ $t('pixelParams.verticalEnhancement') }}: {{ params.enhanceVertical.toFixed(1) }}</div>
+                      <div class="text-body2 q-mb-sm">
+                        {{ $t('pixelParams.verticalEnhancement') }}: {{ params.enhanceVertical.toFixed(1) }}
+                        <q-icon name="help" size="xs" color="primary" class="cursor-pointer">
+                          <q-tooltip>{{ $t('pixelParams.verticalEnhancementDesc') }}</q-tooltip>
+                        </q-icon>
+                      </div>
                       <q-slider
                         v-model="params.enhanceVertical"
                         :min="0.5"
@@ -132,6 +178,9 @@
                     {{ $t('pixelParams.pixelSize') }}:
                     <span v-if="useDirectSampling">{{ params.pixelSize || 8 }}px ({{ $t('pixelParams.manualSet') }})</span>
                     <span v-else>{{ params.pixelSize === 0 ? $t('pixelParams.autoDetect') : params.pixelSize + 'px' }}</span>
+                    <q-icon name="help" size="xs" color="primary" class="cursor-pointer">
+                      <q-tooltip>{{ $t('pixelParams.pixelSizeDesc') }}</q-tooltip>
+                    </q-icon>
                   </div>
                   <q-slider
                     v-model="params.pixelSize"
@@ -145,7 +194,12 @@
 
                 <template v-if="!useDirectSampling && params.pixelSize === 0">
                   <div class="q-mb-md">
-                    <div class="text-body2 q-mb-sm">{{ $t('pixelParams.minPixelSize') }}: {{ params.minS }}</div>
+                    <div class="text-body2 q-mb-sm">
+                      {{ $t('pixelParams.minPixelSize') }}: {{ params.minS }}
+                      <q-icon name="help" size="xs" color="primary" class="cursor-pointer">
+                        <q-tooltip>{{ $t('pixelParams.minPixelSizeDesc') }}</q-tooltip>
+                      </q-icon>
+                    </div>
                     <q-slider
                       v-model="params.minS"
                       :min="2"
@@ -157,7 +211,12 @@
                   </div>
 
                   <div class="q-mb-md">
-                    <div class="text-body2 q-mb-sm">{{ $t('pixelParams.maxPixelSize') }}: {{ params.maxS }}</div>
+                    <div class="text-body2 q-mb-sm">
+                      {{ $t('pixelParams.maxPixelSize') }}: {{ params.maxS }}
+                      <q-icon name="help" size="xs" color="primary" class="cursor-pointer">
+                        <q-tooltip>{{ $t('pixelParams.maxPixelSizeDesc') }}</q-tooltip>
+                      </q-icon>
+                    </div>
                     <q-slider
                       v-model="params.maxS"
                       :min="10"
@@ -174,37 +233,82 @@
 
                 <q-toggle
                   v-model="params.sample"
-                  :label="$t('samplingMode.generatePixelArt')"
                   class="q-mb-md"
-                />
+                >
+                  <template v-slot:default>
+                    <span class="flex items-center">
+                      {{ $t('samplingMode.generatePixelArt') }}
+                      <q-icon name="help" size="xs" color="primary" class="cursor-pointer q-ml-xs">
+                        <q-tooltip>{{ $t('samplingMode.generatePixelArtDesc') }}</q-tooltip>
+                      </q-icon>
+                    </span>
+                  </template>
+                </q-toggle>
 
                 <template v-if="params.sample">
                   <q-toggle
                     v-model="useDirectSampling"
-                    :label="$t('samplingMode.directProportionalSampling')"
                     class="q-mb-md"
-                  />
+                  >
+                    <template v-slot:default>
+                      <span class="flex items-center">
+                        {{ $t('samplingMode.directProportionalSampling') }}
+                        <q-icon name="help" size="xs" color="primary" class="cursor-pointer q-ml-xs">
+                          <q-tooltip>{{ $t('samplingMode.directProportionalSamplingDesc') }}</q-tooltip>
+                        </q-icon>
+                      </span>
+                    </template>
+                  </q-toggle>
 
                   <template v-if="!useDirectSampling">
                     <q-select
                       v-model="params.sampleMode"
                       :options="sampleModeOptions.filter(opt => opt.value !== 'direct')"
-                      :label="$t('samplingMode.energyMapSampling')"
                       emit-value
                       map-options
                       class="q-mb-md"
-                    />
+                    >
+                      <template v-slot:selected>
+                        <span class="flex items-center">
+                          {{ $t('samplingMode.energyMapSampling') }}
+                          <q-icon name="help" size="xs" color="primary" class="cursor-pointer q-ml-xs">
+                            <q-tooltip>{{ $t('samplingMode.energyMapSamplingDesc') }}</q-tooltip>
+                          </q-icon>
+                        </span>
+                      </template>
+                      <template v-slot:label>
+                        <span class="flex items-center">
+                          {{ $t('samplingMode.energyMapSampling') }}
+                          <q-icon name="help" size="xs" color="primary" class="cursor-pointer q-ml-xs">
+                            <q-tooltip>{{ $t('samplingMode.energyMapSamplingDesc') }}</q-tooltip>
+                          </q-icon>
+                        </span>
+                      </template>
+                    </q-select>
                   </template>
 
                   <q-toggle
                     v-model="params.nativeRes"
-                    :label="$t('samplingMode.nativeResolution')"
                     class="q-mb-md"
-                  />
+                  >
+                    <template v-slot:default>
+                      <span class="flex items-center">
+                        {{ $t('samplingMode.nativeResolution') }}
+                        <q-icon name="help" size="xs" color="primary" class="cursor-pointer q-ml-xs">
+                          <q-tooltip>{{ $t('samplingMode.nativeResolutionDesc') }}</q-tooltip>
+                        </q-icon>
+                      </span>
+                    </template>
+                  </q-toggle>
 
                   <template v-if="!params.nativeRes">
                     <div class="q-mb-md">
-                      <div class="text-body2 q-mb-sm">{{ $t('samplingMode.upscaleFactor') }}: {{ params.upscale === 0 ? $t('samplingMode.auto') : params.upscale }}</div>
+                      <div class="text-body2 q-mb-sm">
+                        {{ $t('samplingMode.upscaleFactor') }}: {{ params.upscale === 0 ? $t('samplingMode.auto') : params.upscale }}
+                        <q-icon name="help" size="xs" color="primary" class="cursor-pointer">
+                          <q-tooltip>{{ $t('samplingMode.upscaleFactorDesc') }}</q-tooltip>
+                        </q-icon>
+                      </div>
                       <q-slider
                         v-model="params.upscale"
                         :min="0"
@@ -218,7 +322,12 @@
 
                   <template v-if="!useDirectSampling && params.sampleMode === 'weighted'">
                     <div class="q-mb-md">
-                      <div class="text-body2 q-mb-sm">{{ $t('samplingMode.weightedRatio') }}: {{ params.sampleWeightRatio.toFixed(1) }}</div>
+                      <div class="text-body2 q-mb-sm">
+                        {{ $t('samplingMode.weightedRatio') }}: {{ params.sampleWeightRatio.toFixed(1) }}
+                        <q-icon name="help" size="xs" color="primary" class="cursor-pointer">
+                          <q-tooltip>{{ $t('samplingMode.weightedRatioDesc') }}</q-tooltip>
+                        </q-icon>
+                      </div>
                       <q-slider
                         v-model="params.sampleWeightRatio"
                         :min="0.1"
@@ -259,9 +368,17 @@
             <!-- 显示调试信息 -->
             <q-toggle
               v-model="showDebug"
-              :label="$t('actions.showEnergyMapAndGrid')"
               class="q-mb-md"
-            />
+            >
+              <template v-slot:default>
+                <span class="flex items-center">
+                  {{ $t('actions.showEnergyMapAndGrid') }}
+                  <q-icon name="help" size="xs" color="primary" class="cursor-pointer q-ml-xs">
+                    <q-tooltip>{{ $t('actions.showEnergyMapAndGridDesc') }}</q-tooltip>
+                  </q-icon>
+                </span>
+              </template>
+            </q-toggle>
 
             <!-- 状态信息 -->
             <div v-if="result" class="text-body2 text-grey-7">

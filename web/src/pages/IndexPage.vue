@@ -9,9 +9,21 @@
         <h2 class="text-h4 text-weight-regular q-mb-lg">
           {{ $t('home.subtitle') }}
         </h2>
-        <p class="text-body1 q-mb-xl text-grey-7">
-          {{ $t('home.description') }}
-        </p>
+        <div class="row items-center justify-center q-mb-xl">
+          <p class="text-body1 text-grey-7" style="margin: 0;">
+            {{ $t('home.description') }}
+          </p>
+          <q-icon
+            name="help"
+            size="sm"
+            color="primary"
+            class="q-ml-md cursor-pointer"
+          >
+            <q-tooltip class="bg-primary text-white">
+              {{ $t('home.description') }}
+            </q-tooltip>
+          </q-icon>
+        </div>
         <q-btn
           color="primary"
           size="lg"

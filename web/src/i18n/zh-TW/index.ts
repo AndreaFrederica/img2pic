@@ -99,33 +99,50 @@ export default {
     title: '像素化參數',
     energyAlgorithmParams: '能量演算法參數',
     gaussianBlur: '高斯模糊 (σ)',
+    gaussianBlurDesc: '控制圖像模糊程度，值越大越模糊，用於平滑噪聲',
     gapTolerance: '間隙容忍度',
+    gapToleranceDesc: '允許網格線間隙大小，值越大越容易連接斷裂線',
     minEnergyThreshold: '最小能量閾值',
+    minEnergyThresholdDesc: '能量值低於此閾值之像素將被忽略，用於過濾弱邊緣',
     smoothWindowSize: '平滑視窗大小',
+    smoothWindowSizeDesc: '用於平滑能量圖之視窗大小，值越大平滑效果越強',
     enableEnergyEnhancement: '啟用能量增強',
+    enableEnergyEnhancementDesc: '啟用能量增強以改進邊緣檢測效果',
     directionalEnhancement: '方向性增強',
+    directionalEnhancementDesc: '針對特定方向增強邊緣檢測',
     horizontalEnhancement: '水平增強倍數',
+    horizontalEnhancementDesc: '增強水平方向之邊緣檢測強度',
     verticalEnhancement: '垂直增強倍數',
+    verticalEnhancementDesc: '增強垂直方向之邊緣檢測強度',
     pixelSize: '像素大小',
+    pixelSizeDesc: '設置為0時自動檢測，手動設置時指定像素塊大小',
     manualSet: '手動設定',
     autoDetect: '自動偵測',
     minPixelSize: '最小像素大小',
-    maxPixelSize: '最大像素大小'
+    minPixelSizeDesc: '自動檢測時允許之最小像素大小',
+    maxPixelSize: '最大像素大小',
+    maxPixelSizeDesc: '自動檢測時允許之最大像素大小'
   },
 
   // 採樣模式
   samplingMode: {
     title: '採樣模式',
     generatePixelArt: '生成像素畫',
+    generatePixelArtDesc: '啟用時根據檢測之網格生成像素畫，禁用時僅顯示能量圖',
     directProportionalSampling: '直接按比例採樣（適用於普通圖片）',
+    directProportionalSamplingDesc: '適合普通圖片轉換為像素畫，不使用能量圖檢測，直接按指定像素大小採樣',
     energyMapSampling: '能量圖採樣模式',
+    energyMapSamplingDesc: '選擇如何從檢測之網格中採樣顏色：中心採樣、平均採樣或加權平均',
     centerSampling: '中心採樣',
     averageSampling: '平均採樣',
     weightedAverage: '加權平均',
     nativeResolution: '原生解析度 (1像素=1格)',
+    nativeResolutionDesc: '輸出圖像之每個像素對應一個網格，不進行放大',
     upscaleFactor: '放大倍數',
+    upscaleFactorDesc: '輸出圖像之放大倍數，設置為0時自動計算最佳倍數',
     auto: '自動',
     weightedRatio: '加權比例',
+    weightedRatioDesc: '加權平均採樣時中心點權重比例，值越大越重視中心像素',
     directSamplingParams: '直接採樣參數',
     directSamplingDescription: '直接採樣模式適用於普通圖片轉換為像素畫。需要手動設定像素大小。'
   },
@@ -133,11 +150,17 @@ export default {
   // 操作按鈕
   actions: {
     startProcessing: '開始處理',
+    startProcessingDesc: '根據當前參數處理圖像，生成像素藝術',
     showEnergyMapAndGrid: '顯示能量圖和網格線',
+    showEnergyMapAndGridDesc: '在結果區域顯示能量圖與檢測到之網格線，用於調試與檢查檢測效果',
     downloadPureEnergyMap: '下載純能量圖',
+    downloadPureEnergyMapDesc: '下載僅含能量信息之灰度圖像，不含網格線',
     downloadEnergyMapWithGrid: '下載能量圖+網格',
+    downloadEnergyMapWithGridDesc: '下載含能量圖與檢測到之網格線之調試圖像',
     downloadPixelArt: '下載像素畫',
-    close: '關閉'
+    downloadPixelArtDesc: '下載生成之最終像素藝術作品',
+    close: '關閉',
+    closeDesc: '關閉對話框或取消操作'
   },
 
   // 狀態資訊
@@ -161,10 +184,19 @@ export default {
     options: {
       'zh-CN': '简体中文',
       'zh-TW': '繁體中文',
+      'zh-classical': '文言文',
       'ja': '日本語',
+      'ja-h': '日本語(漢字)',
       'en': 'English',
+      'es': 'Español',
+      'de': 'Deutsch',
+      'it': 'Italiano',
+      'pt': 'Português',
       'fr': 'Français',
-      'ru': 'Русский'
+      'ru': 'Русский',
+      'ko': '한국어',
+      'ar': 'العربية',
+      'hi': 'हिन्दी'
     }
   }
 };

@@ -99,33 +99,50 @@ export default {
     title: 'Paramètres de pixelisation',
     energyAlgorithmParams: 'Paramètres de l\'algorithme d\'énergie',
     gaussianBlur: 'Flou gaussien (σ)',
+    gaussianBlurDesc: 'Contrôle le degré de flou de l\'image, plus la valeur est élevée, plus le flou est fort, utilisé pour lisser le bruit',
     gapTolerance: 'Tolérance d\'espacement',
+    gapToleranceDesc: 'Taille des espaces entre les lignes de grille autorisés, plus la valeur est élevée, plus il est facile de connecter les lignes brisées',
     minEnergyThreshold: 'Seuil d\'énergie minimum',
+    minEnergyThresholdDesc: 'Les pixels dont la valeur d\'énergie est inférieure à ce seuil seront ignorés, utilisé pour filtrer les bords faibles',
     smoothWindowSize: 'Taille de la fenêtre de lissage',
+    smoothWindowSizeDesc: 'Taille de la fenêtre utilisée pour lisser la carte d\'énergie, plus la valeur est élevée, plus l\'effet de lissage est fort',
     enableEnergyEnhancement: 'Activer l\'amélioration d\'énergie',
+    enableEnergyEnhancementDesc: 'Activer l\'amélioration de l\'énergie pour améliorer la détection des bords',
     directionalEnhancement: 'Amélioration directionnelle',
+    directionalEnhancementDesc: 'Renforce la détection des bords dans des directions spécifiques',
     horizontalEnhancement: 'Facteur d\'amélioration horizontal',
+    horizontalEnhancementDesc: 'Renforce l\'intensité de la détection des bords horizontaux',
     verticalEnhancement: 'Facteur d\'amélioration vertical',
+    verticalEnhancementDesc: 'Renforce l\'intensité de la détection des bords verticaux',
     pixelSize: 'Taille de pixel',
+    pixelSizeDesc: 'Défini sur 0 pour détection automatique, réglage manuel pour spécifier la taille des blocs de pixels',
     manualSet: 'Réglage manuel',
     autoDetect: 'Détection automatique',
     minPixelSize: 'Taille de pixel minimum',
-    maxPixelSize: 'Taille de pixel maximum'
+    minPixelSizeDesc: 'Taille de pixel minimale autorisée lors de la détection automatique',
+    maxPixelSize: 'Taille de pixel maximum',
+    maxPixelSizeDesc: 'Taille de pixel maximale autorisée lors de la détection automatique'
   },
 
   // Mode d'échantillonnage
   samplingMode: {
     title: 'Mode d\'échantillonnage',
     generatePixelArt: 'Générer du pixel art',
+    generatePixelArtDesc: 'Activé, génère du pixel art à partir de la grille détectée. Désactivé, affiche uniquement la carte d\'énergie',
     directProportionalSampling: 'Échantillonnage proportionnel direct (pour images normales)',
+    directProportionalSamplingDesc: 'Convient pour convertir des images normales en pixel art, sans utiliser la détection de carte d\'énergie, échantillonne directement selon la taille de pixel spécifiée',
     energyMapSampling: 'Mode d\'échantillonnage de carte d\'énergie',
+    energyMapSamplingDesc: 'Choisissez comment échantillonner les couleurs à partir de la grille détectée : échantillonnage central, moyen ou pondéré',
     centerSampling: 'Échantillonnage central',
     averageSampling: 'Échantillonnage moyen',
     weightedAverage: 'Moyenne pondérée',
     nativeResolution: 'Résolution native (1 pixel = 1 case)',
+    nativeResolutionDesc: 'Chaque pixel de l\'image de sortie correspond à une grille, sans agrandissement',
     upscaleFactor: 'Facteur d\'agrandissement',
+    upscaleFactorDesc: 'Facteur d\'agrandissement de l\'image de sortie, défini sur 0 pour calcul automatique du meilleur facteur',
     auto: 'Auto',
     weightedRatio: 'Ratio de pondération',
+    weightedRatioDesc: 'Ratio de pondération du point central lors de l\'échantillonnage moyen pondéré, plus la valeur est élevée, plus le pixel central est privilégié',
     directSamplingParams: 'Paramètres d\'échantillonnage direct',
     directSamplingDescription: 'Le mode d\'échantillonnage direct convient pour convertir des images normales en pixel art. La taille des pixels doit être définie manuellement.'
   },
@@ -133,11 +150,17 @@ export default {
   // Boutons d'action
   actions: {
     startProcessing: 'Commencer le traitement',
+    startProcessingDesc: 'Traiter l\'image selon les paramètres actuels pour générer du pixel art',
     showEnergyMapAndGrid: 'Afficher la carte d\'énergie et la grille',
+    showEnergyMapAndGridDesc: 'Afficher la carte d\'énergie et les lignes de grille détectées dans la zone de résultats, utilisé pour le débogage et la vérification des effets de détection',
     downloadPureEnergyMap: 'Télécharger la carte d\'énergie pure',
+    downloadPureEnergyMapDesc: 'Télécharger une image en niveaux de gris contenant uniquement les informations d\'énergie sans les lignes de grille',
     downloadEnergyMapWithGrid: 'Télécharger énergie+grille',
+    downloadEnergyMapWithGridDesc: 'Télécharger une image de débogage contenant la carte d\'énergie et les lignes de grille détectées',
     downloadPixelArt: 'Télécharger le pixel art',
-    close: 'Fermer'
+    downloadPixelArtDesc: 'Télécharger l\'œuvre de pixel art finale générée',
+    close: 'Fermer',
+    closeDesc: 'Fermer la boîte de dialogue ou annuler l\'opération'
   },
 
   // Informations de statut
@@ -161,10 +184,19 @@ export default {
     options: {
       'zh-CN': '简体中文',
       'zh-TW': '繁體中文',
+      'zh-classical': '文言文',
       'ja': '日本語',
+      'ja-h': '日本語(漢字)',
       'en': 'English',
+      'es': 'Español',
+      'de': 'Deutsch',
+      'it': 'Italiano',
+      'pt': 'Português',
       'fr': 'Français',
-      'ru': 'Русский'
+      'ru': 'Русский',
+      'ko': '한국어',
+      'ar': 'العربية',
+      'hi': 'हिन्दी'
     }
   }
 };

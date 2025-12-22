@@ -21,6 +21,7 @@
         "nosniff",
         "numpy",
         "opencv",
+        "Pixelization",
         "pixelize",
         "pixelizing",
         "pypi",

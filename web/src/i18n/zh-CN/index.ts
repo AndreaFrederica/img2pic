@@ -99,33 +99,50 @@ export default {
     title: '像素化参数',
     energyAlgorithmParams: '能量算法参数',
     gaussianBlur: '高斯模糊 (σ)',
+    gaussianBlurDesc: '控制图像模糊程度，值越大越模糊，用于平滑噪声',
     gapTolerance: '间隙容忍度',
+    gapToleranceDesc: '允许的网格线间隙大小，值越大越容易连接断裂的线',
     minEnergyThreshold: '最小能量阈值',
+    minEnergyThresholdDesc: '能量值低于此阈值的像素将被忽略，用于过滤弱边缘',
     smoothWindowSize: '平滑窗口大小',
+    smoothWindowSizeDesc: '用于平滑能量图的窗口大小，值越大平滑效果越强',
     enableEnergyEnhancement: '启用能量增强',
+    enableEnergyEnhancementDesc: '启用后可以增强边缘检测的能量值，提高检测精度',
     directionalEnhancement: '方向性增强',
+    directionalEnhancementDesc: '启用后可以分别调整水平和垂直方向的增强强度',
     horizontalEnhancement: '水平增强倍数',
+    horizontalEnhancementDesc: '增强水平方向的边缘检测强度',
     verticalEnhancement: '垂直增强倍数',
+    verticalEnhancementDesc: '增强垂直方向的边缘检测强度',
     pixelSize: '像素大小',
+    pixelSizeDesc: '设置为0时自动检测，手动设置时指定像素块大小',
     manualSet: '手动设置',
     autoDetect: '自动检测',
     minPixelSize: '最小像素大小',
-    maxPixelSize: '最大像素大小'
+    minPixelSizeDesc: '自动检测时允许的最小像素大小',
+    maxPixelSize: '最大像素大小',
+    maxPixelSizeDesc: '自动检测时允许的最大像素大小'
   },
 
   // 采样模式
   samplingMode: {
     title: '采样模式',
     generatePixelArt: '生成像素画',
+    generatePixelArtDesc: '启用后将根据检测到的网格生成像素画，关闭则只显示能量图',
     directProportionalSampling: '直接按比例采样（适用于普通图片）',
+    directProportionalSamplingDesc: '适用于普通图片转换为像素画，不使用能量图检测，直接按指定像素大小采样',
     energyMapSampling: '能量图采样模式',
+    energyMapSamplingDesc: '选择如何从检测到的网格中采样颜色：中心采样、平均采样或加权平均',
     centerSampling: '中心采样',
     averageSampling: '平均采样',
     weightedAverage: '加权平均',
     nativeResolution: '原生分辨率 (1像素=1格)',
+    nativeResolutionDesc: '输出图像的每个像素对应一个网格，不进行放大',
     upscaleFactor: '放大倍数',
+    upscaleFactorDesc: '输出图像的放大倍数，设置为0时自动计算最佳倍数',
     auto: '自动',
     weightedRatio: '加权比例',
+    weightedRatioDesc: '加权平均采样时的中心点权重比例，值越大越重视中心像素',
     directSamplingParams: '直接采样参数',
     directSamplingDescription: '直接采样模式适用于普通图片转换为像素画。需要手动设置像素大小。'
   },
@@ -133,11 +150,17 @@ export default {
   // 操作按钮
   actions: {
     startProcessing: '开始处理',
+    startProcessingDesc: '开始处理图片，根据当前参数生成像素画',
     showEnergyMapAndGrid: '显示能量图和网格线',
+    showEnergyMapAndGridDesc: '在结果区域显示能量图和检测到的网格线，用于调试和查看检测效果',
     downloadPureEnergyMap: '下载纯能量图',
+    downloadPureEnergyMapDesc: '下载只包含能量信息的灰度图，不包含网格线',
     downloadEnergyMapWithGrid: '下载能量图+网格',
+    downloadEnergyMapWithGridDesc: '下载包含能量图和检测到的网格线的调试图像',
     downloadPixelArt: '下载像素画',
-    close: '关闭'
+    downloadPixelArtDesc: '下载生成的最终像素画作品',
+    close: '关闭',
+    closeDesc: '关闭对话框或取消操作'
   },
 
   // 状态信息
@@ -161,10 +184,19 @@ export default {
     options: {
       'zh-CN': '简体中文',
       'zh-TW': '繁體中文',
+      'zh-classical': '文言文',
       'ja': '日本語',
+      'ja-h': '日本語(漢字)',
       'en': 'English',
+      'es': 'Español',
+      'de': 'Deutsch',
+      'it': 'Italiano',
+      'pt': 'Português',
       'fr': 'Français',
-      'ru': 'Русский'
+      'ru': 'Русский',
+      'ko': '한국어',
+      'ar': 'العربية',
+      'hi': 'हिन्दी'
     }
   }
 };
