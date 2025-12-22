@@ -22,11 +22,11 @@
             />
 
           <!-- 调试信息 -->
-          <div v-if="imageSrc" style="position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.8); color: white; padding: 5px; font-size: 12px; border-radius: 4px;">
+          <!-- <div v-if="imageSrc" style="position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.8); color: white; padding: 5px; font-size: 12px; border-radius: 4px;">
             <div>图片信息调试:</div>
             <div>src: {{ imageSrc.substring(0, 50) }}...</div>
             <div v-if="imageSrc.length > 50">长度: {{ imageSrc.length }}</div>
-          </div>
+          </div> -->
         </div>
 
         <!-- 双指缩放中心点指示器 -->
