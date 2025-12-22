@@ -42,33 +42,33 @@ if ('serviceWorker' in navigator) {
     }
   });
 
-  wb.addEventListener('activated', (event) => {
+  wb.addEventListener('activated', () => {
     console.log('Service Worker activated.');
   });
 
-  wb.addEventListener('controlling', (event) => {
+  wb.addEventListener('controlling', () => {
     console.log('Service Worker is controlling the page.');
   });
 
-  wb.addEventListener('externalactivated', (event) => {
+  wb.addEventListener('externalactivated', () => {
     console.log('Service Worker was activated on another page.');
   });
 
-  wb.addEventListener('externalinstalled', (event) => {
+  wb.addEventListener('externalinstalled', () => {
     console.log('Service Worker was installed on another page.');
   });
 
-  wb.addEventListener('externalwaiting', (event) => {
+  wb.addEventListener('externalwaiting', () => {
     console.log('Service Worker is waiting on another page.');
   });
 
   // Handle updates
-  wb.addEventListener('waiting', (event) => {
+  wb.addEventListener('waiting', () => {
     console.log('A new version is available; please refresh.');
     showUpdateUI(wb);
   });
 
-  wb.addEventListener('redundant', (event) => {
+  wb.addEventListener('redundant', () => {
     console.log('The installing service worker became redundant.');
   });
 

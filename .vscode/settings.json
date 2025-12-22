@@ -1,6 +1,9 @@
 {
     "cSpell.words": [
+        "appinstalled",
         "autocorr",
+        "axios",
+        "beforeinstallprompt",
         "cnum",
         "Comlink",
         "ctype",
@@ -26,6 +29,7 @@
         "nosniff",
         "numpy",
         "opencv",
+        "pinia",
         "Pixelization",
         "pixelize",
         "pixelizing",

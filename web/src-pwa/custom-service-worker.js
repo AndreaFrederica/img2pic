@@ -1,93 +1,93 @@
+/* eslint-env serviceworker */
+/* global workbox */
 /*
  * Custom Service Worker for img2pic PWA
  * This service worker provides offline functionality for the pixel art conversion app
  */
 
-// Note: Workbox imports will be injected by Quasar during build
-// self.__WB_MANIFEST will contain the list of assets to cache
+// Note: Workbox will inject the precache manifest here
+globalThis.importScripts(
+  'https://storage.googleapis.com/workbox-cdn/releases/6.5.4/workbox-sw.js'
+);
 
-// Cache strategy for the app shell (HTML, CSS, JS, etc.)
-self.addEventListener('fetch', (event) => {
-  const { request } = event;
+workbox.loadModule('workbox-precaching');
+workbox.loadModule('workbox-routing');
+workbox.loadModule('workbox-strategies');
 
-  // Cache strategy for different request types
-  if (
-    request.destination === 'script' ||
-    request.destination === 'style' ||
-    request.destination === 'font' ||
-    request.url.includes('/icons/') ||
-    request.url.includes('/assets/')
-  ) {
-    // Stale-while-revalidate for static assets
-    event.respondWith(
-      caches.open('app-shell-cache').then((cache) => {
-        return cache.match(request).then((response) => {
-          const fetchPromise = fetch(request).then((networkResponse) => {
-            // Update cache with fresh version
-            if (networkResponse.ok) {
-              cache.put(request, networkResponse.clone());
-            }
-            return networkResponse;
-          });
-          // Return cached version or network request
-          return response || fetchPromise;
-        });
-      })
-    );
-  } else if (request.destination === 'document') {
-    // Network-first for HTML pages
-    event.respondWith(
-      fetch(request)
-        .then((response) => {
-          // Cache the successful response
-          if (response.ok) {
-            const responseClone = response.clone();
-            caches.open('html-cache').then((cache) => {
-              cache.put(request, responseClone);
-            });
-          }
-          return response;
-        })
-        .catch(() => {
-          // If network fails, try to get from cache
-          return caches.match(request).then((cachedResponse) => {
-            return cachedResponse || caches.match('/index.html');
-          });
-        })
-    );
+// This line will be replaced with the actual precache manifest
+workbox.precaching.precacheAndRoute(self.__WB_MANIFEST);
+
+// Cache strategy for different request types
+workbox.routing.registerRoute(
+  ({ request }) => {
+    // Cache static assets
+    return request.destination === 'script' ||
+           request.destination === 'style' ||
+           request.destination === 'font' ||
+           request.url.includes('/icons/') ||
+           request.url.includes('/assets/');
+  },
+  new workbox.strategies.StaleWhileRevalidate({
+    cacheName: 'app-shell-cache',
+    plugins: [
+      new workbox.expiration.ExpirationPlugin({
+        maxEntries: 100,
+        maxAgeSeconds: 7 * 24 * 60 * 60, // 7 days
+      }),
+    ],
+  })
+);
+
+// Cache HTML pages with NetworkFirst strategy
+workbox.routing.registerRoute(
+  ({ request }) => request.destination === 'document',
+  new workbox.strategies.NetworkFirst({
+    cacheName: 'html-cache',
+    plugins: [
+      new workbox.expiration.ExpirationPlugin({
+        maxEntries: 10,
+        maxAgeSeconds: 24 * 60 * 60, // 24 hours
+      }),
+    ],
+  })
+);
+
+// Cache external resources (like Google Fonts, CDN resources)
+workbox.routing.registerRoute(
+  ({ url }) => url.origin !== self.location.origin,
+  new workbox.strategies.CacheFirst({
+    cacheName: 'external-resources',
+    plugins: [
+      new workbox.expiration.ExpirationPlugin({
+        maxEntries: 50,
+        maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
+      }),
+    ],
+  })
+);
+
+// Don't cache user uploads - process them directly
+workbox.routing.registerRoute(
+  ({ url }) => {
+    return url.pathname.includes('upload') || url.pathname.includes('temp');
+  },
+  new workbox.strategies.NetworkFirst({
+    cacheName: 'user-uploads',
+    networkTimeoutSeconds: 3,
+    plugins: [
+      new workbox.expiration.ExpirationPlugin({
+        maxEntries: 5,
+        maxAgeSeconds: 60, // Only cache uploads for 1 minute
+      }),
+    ],
+  })
+);
+
+// Handle offline fallback for HTML pages
+workbox.routing.setCatchHandler(({ event }) => {
+  if (event.request.destination === 'document') {
+    return caches.match('/index.html');
   }
-});
-
-// Install event - cache important assets
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open('app-shell-cache').then((cache) => {
-      // Cache important assets
-      return cache.addAll([
-        '/',
-        '/index.html',
-        // Add other critical assets if needed
-      ]);
-    })
-  );
-});
-
-// Activate event - clean up old caches
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames
-          .filter((cacheName) => {
-            // Keep our caches, delete others
-            return cacheName !== 'app-shell-cache' && cacheName !== 'html-cache';
-          })
-          .map((cacheName) => {
-            return caches.delete(cacheName);
-          })
-      );
-    })
-  );
 });
 
 // Handle push notifications for future features
@@ -116,7 +116,7 @@ self.addEventListener('notificationclick', (event) => {
 
   if (event.action === 'explore') {
     event.waitUntil(
-      clients.openWindow('/')
+      globalThis.clients.openWindow('/')
     );
   }
 });
