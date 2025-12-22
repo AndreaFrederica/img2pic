@@ -16,34 +16,37 @@ const CACHE_TTL = {
 };
 
 /**
- * The main fetch handler for the worker
+ * Main fetch handler for the worker
  */
-addEventListener('fetch', event => {
-  try {
-    event.respondWith(handleEvent(event));
-  } catch (e) {
-    event.respondWith(new Response('Internal Error', { status: 500 }));
-  }
-});
+export default {
+  async fetch(request, env, ctx) {
+    try {
+      return await handleRequest(request, env, ctx);
+    } catch (e) {
+      console.error('Worker error:', e);
+      return new Response('Internal Server Error', { status: 500 });
+    }
+  },
+};
 
 /**
- * Handle the fetch event
+ * Handle the fetch request
  */
-async function handleEvent(event) {
-  const url = new URL(event.request.url);
+async function handleRequest(request, env, ctx) {
+  const url = new URL(request.url);
   const pathname = url.pathname;
 
   // Handle API routes if needed
   if (pathname.startsWith('/api/')) {
-    return handleApiRequest(event.request, pathname);
+    return handleApiRequest(request, pathname);
   }
 
   // Handle static assets
-  return handleAssetRequest(event.request, pathname);
+  return handleAssetRequest(request, pathname, env, ctx);
 }
 
 /**
- * Handle API requests (add your API logic here)
+ * Handle API requests
  */
 async function handleApiRequest(request, pathname) {
   // Example API endpoint
@@ -63,7 +66,7 @@ async function handleApiRequest(request, pathname) {
 /**
  * Handle static asset requests
  */
-async function handleAssetRequest(request, pathname) {
+async function handleAssetRequest(request, pathname, env, ctx) {
   // Default to index.html for SPA routing
   if (pathname === '/' || !pathname.includes('.')) {
     const url = new URL(request.url);
@@ -72,19 +75,17 @@ async function handleAssetRequest(request, pathname) {
   }
 
   try {
-    // Map request to asset and serve from KV
+    // Get asset from KV storage
     const asset = await getAssetFromKV(request, {
-      mapRequestToAsset: req => {
-        // First try to get the exact path
-        return mapRequestToAsset(req);
-      },
+      ASSET_NAMESPACE: env.ASSETS,
+      ASSET_MANIFEST: env.ASSET_MANIFEST,
     });
 
     // Determine content type and set cache headers
     const contentType = asset.headers.get('content-type') || 'text/plain';
     const cacheTime = getCacheTime(contentType, pathname);
 
-    // Set security headers
+    // Create response with proper headers
     const response = new Response(asset.body, asset);
 
     // Cache headers
@@ -92,30 +93,28 @@ async function handleAssetRequest(request, pathname) {
 
     // Security headers
     response.headers.set('X-Content-Type-Options', 'nosniff');
-    response.headers.set('X-Frame-Options', 'DENY');
+    response.headers.set('X-Frame-Options', 'SAMEORIGIN');
     response.headers.set('X-XSS-Protection', '1; mode=block');
     response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
 
-    // Enable Gzip compression
-    if (shouldCompress(pathname)) {
-      response.headers.set('Content-Encoding', 'gzip');
-    }
-
     return response;
   } catch (e) {
-    // If asset not found, return 404 or fallback to index.html for SPA
-    if (e.status === 404 && shouldServeIndex(pathname)) {
+    console.error('Asset error:', e);
+
+    // If asset not found, try to serve index.html for SPA routing
+    if (shouldServeIndex(pathname)) {
       try {
-        const indexAsset = await getAssetFromKV(request, {
-          mapRequestToAsset: req => {
-            const url = new URL(req.url);
-            url.pathname = '/index.html';
-            return new Request(url, req);
-          },
+        const indexRequest = new Request(new URL('/index.html', request.url), request);
+        const indexAsset = await getAssetFromKV(indexRequest, {
+          ASSET_NAMESPACE: env.ASSETS,
+          ASSET_MANIFEST: env.ASSET_MANIFEST,
         });
 
-        return new Response(indexAsset.body, indexAsset);
+        const response = new Response(indexAsset.body, indexAsset);
+        response.headers.set('Cache-Control', `public, max-age=${CACHE_TTL.html}`);
+        return response;
       } catch (indexError) {
+        console.error('Index asset error:', indexError);
         return new Response('Application not found', { status: 404 });
       }
     }
@@ -143,13 +142,6 @@ function getCacheTime(contentType, pathname) {
 }
 
 /**
- * Check if file should be compressed
- */
-function shouldCompress(pathname) {
-  return pathname.match(/\.(js|css|html|txt|xml|json)$/);
-}
-
-/**
  * Check if should serve index.html for SPA routing
  */
 function shouldServeIndex(pathname) {
@@ -161,23 +153,4 @@ function shouldServeIndex(pathname) {
 
   // Serve index for all other routes (SPA routing)
   return true;
-}
-
-/**
- * Handle CORS preflight requests
- */
-function handleCors(request) {
-  const corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-  };
-
-  if (request.method === 'OPTIONS') {
-    return new Response(null, {
-      headers: corsHeaders,
-    });
-  }
-
-  return null;
 }
