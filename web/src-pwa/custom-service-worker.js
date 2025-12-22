@@ -27,10 +27,11 @@ self.addEventListener('install', (event) => {
 
   // Cache precached assets (injected by build)
   const precacheUrls = precacheList.map(entry => typeof entry === 'string' ? entry : entry.url);
-  const staticAssets = ['/', '/index.html', '/icons/icon-96x96.png', '/icons/icon-128x128.png'];
+  // Build process already includes all assets, so we don't need additional staticAssets
+  const urlsToCache = [...new Set(precacheUrls)]; // Remove duplicates
 
   event.waitUntil(
-    caches.open(PRECACHE_NAME).then((cache) => cache.addAll([...precacheUrls, ...staticAssets]))
+    caches.open(PRECACHE_NAME).then((cache) => cache.addAll(urlsToCache))
   );
 });
 
@@ -73,21 +74,50 @@ self.addEventListener('fetch', (event) => {
   }
 
   // Skip cross-origin requests that shouldn't be cached
-  if (url.origin !== self.location.origin && !url.origin.includes('fonts.gstatic.com')) {
+  if (url.origin !== self.location.origin) {
     return;
   }
 
-  // HTML pages - NetworkFirst for fresh content
+  // Helper: Check cache with fallback to precache
+  const getCachedOrPrecache = async (request) => {
+    // Check runtime cache first
+    const cached = await caches.match(request);
+    if (cached) return cached;
+
+    // Check precache
+    const precache = await caches.open(PRECACHE_NAME);
+    const precached = await precache.match(request);
+    if (precached) return precached;
+
+    return null;
+  };
+
+  // HTML pages - NetworkFirst for fresh content, fallback to cache
   if (request.destination === 'document') {
     event.respondWith(
       fetch(request)
         .then((response) => {
+          if (!response || response.status !== 200) {
+            // If network fails or returns error, try cache
+            return getCachedOrPrecache(request).then(cached => {
+              if (cached) return cached;
+              // Final fallback to offline page
+              return caches.match('/index.html');
+            });
+          }
           // Clone and cache the response
           const responseClone = response.clone();
           caches.open(RUNTIME_CACHE).then((cache) => cache.put(request, responseClone));
           return response;
         })
-        .catch(() => caches.match(request).then((cached) => cached || caches.match('/index.html')))
+        .catch(() => {
+          // Network failed - try cache
+          return getCachedOrPrecache(request).then(cached => {
+            if (cached) return cached;
+            // Final fallback to offline page
+            return caches.match('/index.html');
+          });
+        })
     );
     return;
   }
@@ -99,18 +129,19 @@ self.addEventListener('fetch', (event) => {
       url.pathname.includes('/icons/') ||
       url.pathname.includes('/assets/')) {
     event.respondWith(
-      caches.match(request).then((cached) => {
+      getCachedOrPrecache(request).then((cached) => {
         if (cached) {
-          // Update cache in background
+          // Update cache in background (stale-while-revalidate)
           fetch(request).then((response) => {
             if (response && response.status === 200) {
-              caches.open(RUNTIME_CACHE).then((cache) => cache.put(request, response));
+              const responseClone = response.clone();
+              caches.open(RUNTIME_CACHE).then((cache) => cache.put(request, responseClone));
             }
-          });
+          }).catch(() => {}); // Ignore network errors in background update
           return cached;
         }
+        // Not in cache, fetch from network
         return fetch(request).then((response) => {
-          // Cache successful responses
           if (response && response.status === 200) {
             const responseClone = response.clone();
             caches.open(RUNTIME_CACHE).then((cache) => cache.put(request, responseClone));
@@ -125,7 +156,7 @@ self.addEventListener('fetch', (event) => {
   // Images - CacheFirst
   if (request.destination === 'image') {
     event.respondWith(
-      caches.match(request).then((cached) => {
+      getCachedOrPrecache(request).then((cached) => {
         return cached || fetch(request).then((response) => {
           if (response && response.status === 200) {
             const responseClone = response.clone();
@@ -148,7 +179,7 @@ self.addEventListener('fetch', (event) => {
         }
         return response;
       })
-      .catch(() => caches.match(request))
+      .catch(() => getCachedOrPrecache(request))
   );
 });
 
