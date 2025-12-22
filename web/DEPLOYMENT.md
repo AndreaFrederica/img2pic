@@ -1,193 +1,109 @@
 # Cloudflare Workers 部署指南
 
-本指南说明如何将 img2pic web 应用部署到 Cloudflare Workers。
-
-## 前提条件
-
-1. 安装 Wrangler CLI：
-```bash
-npm install -g wrangler
-```
-
-2. 登录 Cloudflare：
-```bash
-wrangler login
-```
-
 ## 部署步骤
 
-### 1. 构建应用
-
-首先构建 Quasar 应用：
-
+### 1. 构建项目
 ```bash
-cd web
-npm install
+# 构建生产版本
+npm run build:cloudflare
+
+# 或者使用标准构建
 npm run build
 ```
 
-构建完成后，静态文件将生成在 `dist` 目录中。
+### 2. 部署到 Cloudflare
 
-### 2. 安装 Workers 依赖
-
-进入 workers-site 目录并安装依赖：
-
+#### 生产环境部署
 ```bash
-cd workers-site
-npm install
+npm run deploy:cloudflare
 ```
 
-### 3. 配置环境变量
-
-编辑 `wrangler.toml` 文件，根据需要修改：
-
-- 账户 ID（自动获取）
-- 环境变量
-- KV 命名空间
-- D1 数据库（如需要）
-
-### 4. 本地测试
-
-在部署前，可以在本地测试 Workers：
-
+#### 测试环境部署
 ```bash
+npm run deploy:cloudflare:staging
+```
+
+### 3. 手动部署（如果脚本失败）
+```bash
+# 1. 构建项目
+npm run build:cloudflare
+
+# 2. 进入 workers-site 目录
+cd workers-site
+
+# 3. 安装依赖
+npm install
+
+# 4. 部署到生产环境
+npm run deploy:production
+
+# 或部署到测试环境
+npm run deploy:staging
+```
+
+## 配置说明
+
+### wrangler.toml 配置
+- **应用名称**: img2pic-web
+- **入口点**: workers-site/index.js
+- **兼容性**: 2024-01-01
+- **Node.js 兼容**: 已启用
+- **静态资源**: ./dist/spa
+
+### 环境配置
+- **生产环境**: i2p.sirrus.cc
+- **测试环境**: staging.i2p.sirrus.cc
+
+### 缓存策略
+- **HTML**: 2小时
+- **CSS/JS/图片/字体**: 30天
+- **其他资源**: 2小时
+
+### 安全头
+- X-Content-Type-Options: nosniff
+- X-Frame-Options: DENY
+- X-XSS-Protection: 1; mode=block
+- Referrer-Policy: strict-origin-when-cross-origin
+
+## 故障排除
+
+### 常见问题
+
+1. **构建失败**
+   - 确保 Node.js 版本 >= 20
+   - 清除 node_modules 重新安装
+
+2. **部署失败**
+   - 检查 wrangler 是否已登录: `wrangler whoami`
+   - 检查环境变量配置
+
+3. **静态资源 404**
+   - 确保 dist/spa 目录存在
+   - 检查构建输出是否正确
+
+4. **Worker 运行时错误**
+   - 检查兼容性标志
+   - 查看 Workers 日志
+
+### 本地开发
+```bash
+# 启动本地开发服务器
+npm run dev
+
+# 启动 Workers 本地开发
 cd workers-site
 npm run dev
 ```
 
-### 5. 部署到 Workers
-
-部署到生产环境：
-
-```bash
-cd workers-site
-npm run deploy:production
-```
-
-部署到测试环境：
-
-```bash
-cd workers-site
-npm run deploy:staging
-```
-
-## 域名配置
-
-### 自定义域名设置
-
-1. 在 Cloudflare Dashboard 中添加域名 `i2p.sirrus.cc`
-2. 确保域名 DNS 指向 Cloudflare
-3. Workers 将自动配置路由
-
-### DNS 记录
-
-确保以下 DNS 记录已配置：
-
-```
-i2p.sirrus.cc A 192.0.2.1  # Cloudflare IP
-*.i2p.sirrus.cc CNAME i2p.sirrus.cc
-```
-
-## 环境配置
-
-### Production 环境
-
-- 名称：`img2pic-web-prod`
-- 域名：`i2p.sirrus.cc`
-- 路由：自动配置
-
-### Staging 环境
-
-- 名称：`img2pic-web-staging`
-- 域名：`staging.i2p.sirrus.cc`
-- 路由：自动配置
-
-## 缓存策略
-
-Workers 配置了以下缓存策略：
-
-- HTML 文件：2 小时
-- CSS/JS 文件：30 天
-- 图片文件：30 天
-- 字体文件：30 天
-- 其他文件：2 小时
-
-## 安全配置
-
-已配置以下安全头：
-
-- `X-Content-Type-Options: nosniff`
-- `X-Frame-Options: DENY`
-- `X-XSS-Protection: 1; mode=block`
-- `Referrer-Policy: strict-origin-when-cross-origin`
-
-## 常见问题
-
-### 1. 构建文件未找到
-
-确保先运行 `npm run build` 生成 `dist` 目录。
-
-### 2. 域名配置错误
-
-检查 `wrangler.toml` 中的域名配置是否正确。
-
-### 3. 权限错误
-
-确保 Wrangler 已登录并有足够的权限。
-
-## 监控和日志
-
-查看 Workers 日志：
-
-```bash
-wrangler tail
-```
-
-查看特定环境的日志：
-
-```bash
-wrangler tail --env production
-```
-
 ## 更新部署
 
-更新应用时：
+1. 修改代码
+2. 运行 `npm run build:cloudflare`
+3. 运行 `npm run deploy:cloudflare`
+4. 验证部署结果
 
-1. 重新构建应用：
-```bash
-npm run build
-```
+## 监控
 
-2. 重新部署 Workers：
-```bash
-cd workers-site
-npm run deploy:production
-```
-
-## 清理资源
-
-删除 Workers：
-
-```bash
-wrangler delete img2pic-web-prod
-wrangler delete img2pic-web-staging
-```
-
-## 支持的功能
-
-- ✅ 静态文件服务
-- ✅ SPA 路由支持
-- ✅ Gzip 压缩
-- ✅ 缓存优化
-- ✅ 安全头配置
-- ✅ CORS 支持
-- ✅ 自定义域名
-- ⬜ API 路由（可扩展）
-- ⬜ KV 存储（可选）
-- ⬜ D1 数据库（可选）
-
-## 扩展功能
-
-如需添加 API 路由，编辑 `workers-site/index.js` 文件中的 `handleApiRequest` 函数。
-
-如需使用 KV 存储、D1 数据库或其他 Cloudflare 服务，请在 `wrangler.toml` 中添加相应配置。
+- 使用 Cloudflare Dashboard 监控 Worker 性能
+- 查看分析数据了解用户使用情况
+- 设置警报以便及时发现问题

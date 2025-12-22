@@ -12,7 +12,7 @@
     "deploy:production": "wrangler deploy --env production"
   },
   "devDependencies": {
-    "@cloudflare/kv-asset-handler": "~0.3.0",
-    "wrangler": "^3.0.0"
+    "@cloudflare/kv-asset-handler": "^0.3.1",
+    "wrangler": "^3.78.0"
   }
 }
