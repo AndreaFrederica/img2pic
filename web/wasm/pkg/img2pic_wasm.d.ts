@@ -73,7 +73,7 @@ export function init(): void;
 /**
  * 插值缺失的网格线
  */
-export function interpolate_lines(lines: Uint32Array, limit: number, fallback_gap: number): Uint32Array;
+export function interpolate_lines(lines: Uint32Array, limit: number, fallback_gap: number, interp_threshold: number): Uint32Array;
 
 /**
  * 线条插值 - JSON 版本

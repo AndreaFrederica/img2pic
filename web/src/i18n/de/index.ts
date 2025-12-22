@@ -46,6 +46,8 @@ export default {
     gaussianBlurDesc: 'Steuert den Unschärfegrad des Bildes, höhere Werte erzeugen mehr Unschärfe zur Rauschunterdrückung',
     gapTolerance: 'Lückentoleranz',
     gapToleranceDesc: 'Erlaubte Lückengröße für Gitterlinien, höhere Werte verbinden unterbrochene Linien leichter',
+    interpThreshold: 'Interpolationsschwellenwert',
+    interpThresholdDesc: 'Steuert, wann blaue Interpolationslinien zwischen zwei roten Linien eingefügt werden, eingefügt wenn der Abstand den typischen Abstand × diesen Wert überschreitet',
     minEnergyThreshold: 'Mindestenergieschwellenwert',
     minEnergyThresholdDesc: 'Pixel mit Energie unter diesem Schwellenwert werden ignoriert, zum Filtern schwacher Kanten verwendet',
     smoothWindowSize: 'Fenstergröße für Glättung',

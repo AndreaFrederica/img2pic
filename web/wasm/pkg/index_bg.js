@@ -369,12 +369,13 @@ export function init_panic_hook() {
  * @param {Uint32Array} lines
  * @param {number} limit
  * @param {number} fallback_gap
+ * @param {number} interp_threshold
  * @returns {Uint32Array}
  */
-export function interpolate_lines(lines, limit, fallback_gap) {
+export function interpolate_lines(lines, limit, fallback_gap, interp_threshold) {
     const ptr0 = passArray32ToWasm0(lines, wasm.__wbindgen_malloc);
     const len0 = WASM_VECTOR_LEN;
-    const ret = wasm.interpolate_lines(ptr0, len0, limit, fallback_gap);
+    const ret = wasm.interpolate_lines(ptr0, len0, limit, fallback_gap, interp_threshold);
     var v2 = getArrayU32FromWasm0(ret[0], ret[1]).slice();
     wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
     return v2;

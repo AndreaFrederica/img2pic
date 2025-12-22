@@ -46,6 +46,8 @@ export default {
     gaussianBlurDesc: 'Controlla il livello di sfocatura dell\'immagine, valori più alti creano più sfocatura per eliminare il rumore',
     gapTolerance: 'Tolleranza Gap',
     gapToleranceDesc: 'Dimensione del gap consentita per le linee della griglia, valori più alti collegano più facilmente le linee interrotte',
+    interpThreshold: 'Soglia Interpolazione',
+    interpThresholdDesc: 'Controlla quando inserire linee di interpolazione blu tra due linee rosse, inserite quando lo spazio supera lo spazio tipico × questo valore',
     minEnergyThreshold: 'Soglia Minima Energia',
     minEnergyThresholdDesc: 'Pixel con energia sotto questa soglia verranno ignorati, usati per filtrare bordi deboli',
     smoothWindowSize: 'Dimensione Finestra Levigamento',

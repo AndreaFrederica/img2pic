@@ -102,6 +102,8 @@ export default {
     gaussianBlurDesc: '画像のぼかしレベルを制御し、値が大きいほどノイズを滑らかにします',
     gapTolerance: 'ギャップ許容度',
     gapToleranceDesc: 'グリッド線の許容ギャップサイズ、値が大きいほど切断された線を接続しやすくなります',
+    interpThreshold: '補間線閾値',
+    interpThresholdDesc: '2本の赤線の間に青い補間線を挿入するタイミングを制御します、間隔が典型的な間隔×この値を超えると挿入されます',
     minEnergyThreshold: '最小エネルギー閾値',
     minEnergyThresholdDesc: 'この閾値より低いエネルギーのピクセルは無視され、弱いエッジのフィルタリングに使用されます',
     smoothWindowSize: '平滑化ウィンドウサイズ',

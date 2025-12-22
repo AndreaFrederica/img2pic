@@ -42,7 +42,7 @@ export interface WasmModule {
     smooth_win: number,
     window_size: number
   ): { xLines: number[]; yLines: number[] };
-  interpolate_lines(lines: Uint32Array, limit: number, fallback_gap: number): Uint32Array;
+  interpolate_lines(lines: Uint32Array, limit: number, fallback_gap: number, interp_threshold: number): Uint32Array;
   complete_edges(all_lines: Uint32Array, limit: number, typical_gap: number, gap_tolerance: number): Uint32Array;
   sample_pixel_art_direct(
     rgb: Uint8Array,

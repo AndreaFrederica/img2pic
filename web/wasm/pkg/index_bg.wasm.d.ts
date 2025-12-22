@@ -10,7 +10,7 @@ export const enhance_energy_directional: (a: number, b: number, c: number, d: nu
 export const gaussian_kernel_1d: (a: number) => [number, number];
 export const grad_energy: (a: number, b: number, c: number, d: number, e: number) => [number, number];
 export const init_panic_hook: () => void;
-export const interpolate_lines: (a: number, b: number, c: number, d: number) => [number, number];
+export const interpolate_lines: (a: number, b: number, c: number, d: number, e: number) => [number, number];
 export const quantile_approx: (a: number, b: number, c: number) => number;
 export const rgba_to_gray01: (a: number, b: number, c: number, d: number) => [number, number];
 export const sample_pixel_art: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number, k: number, l: number) => any;

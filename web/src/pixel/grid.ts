@@ -231,7 +231,12 @@ function medianGap(lines: number[], fallback: number): number {
   return gaps[idx] || fallback;
 }
 
-export function interpolateLines(lines: number[], limit: number, fallbackGap: number): number[] {
+export function interpolateLines(
+  lines: number[],
+  limit: number,
+  fallbackGap: number,
+  interpThreshold: number = 1.5
+): number[] {
   if (lines.length === 0) return [];
   const typical = medianGap(lines, fallbackGap);
 
@@ -251,7 +256,7 @@ export function interpolateLines(lines: number[], limit: number, fallbackGap: nu
     const a = lines[i]!;
     const b = lines[i + 1]!;
     const gap = b - a;
-    if (gap > typical * 1.5) {
+    if (gap > typical * interpThreshold) {
       const numMissing = Math.max(1, Math.round(gap / typical) - 1);
       for (let k = 1; k <= numMissing; k++) {
         all.push(a + ((k * gap / (numMissing + 1)) | 0));

@@ -43,7 +43,7 @@ declare module '@wasm/index.js' {
       smooth_win: number,
       window_size: number
     ): { xLines: number[]; yLines: number[] };
-    interpolate_lines(lines: number[], limit: number, fallback_gap: number): number[];
+    interpolate_lines(lines: number[], limit: number, fallback_gap: number, interp_threshold: number): number[];
     complete_edges(all_lines: number[], limit: number, typical_gap: number, gap_tolerance: number): number[];
     sample_pixel_art_direct(
       rgb: Uint8ClampedArray,

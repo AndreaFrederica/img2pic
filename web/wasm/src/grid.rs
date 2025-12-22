@@ -317,7 +317,7 @@ fn median_gap(lines: &[usize], fallback: usize) -> usize {
 
 /// 插值缺失的网格线
 #[wasm_bindgen]
-pub fn interpolate_lines(lines: &[usize], limit: usize, fallback_gap: usize) -> Vec<usize> {
+pub fn interpolate_lines(lines: &[usize], limit: usize, fallback_gap: usize, interp_threshold: f32) -> Vec<usize> {
     if lines.is_empty() {
         return Vec::new();
     }
@@ -347,7 +347,8 @@ pub fn interpolate_lines(lines: &[usize], limit: usize, fallback_gap: usize) -> 
         let b = lines[i + 1];
         let gap = b - a;
 
-        if gap > typical + typical / 2 {
+        // 使用 interp_threshold 参数控制插值阈值
+        if gap > (typical as f32 * interp_threshold) as usize {
             let num_missing = (gap / typical).max(1) - 1;
             for k in 1..=num_missing {
                 all.insert(a + ((k * gap / (num_missing + 1)) as usize));

@@ -46,6 +46,8 @@ export default {
     gaussianBlurDesc: 'Controls image blur level, higher values create more blur for noise smoothing',
     gapTolerance: 'Gap Tolerance',
     gapToleranceDesc: 'Allowed gap size for grid lines, higher values connect broken lines more easily',
+    interpThreshold: 'Interpolation Threshold',
+    interpThresholdDesc: 'Controls when to insert blue interpolation lines between two red lines, inserted when gap exceeds typical gap × this value',
     minEnergyThreshold: 'Minimum Energy Threshold',
     minEnergyThresholdDesc: 'Pixels with energy below this threshold will be ignored, used to filter weak edges',
     smoothWindowSize: 'Smooth Window Size',

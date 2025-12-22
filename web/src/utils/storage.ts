@@ -3,6 +3,7 @@ interface StorageSettings {
   pixelSettings?: {
     gaussianBlur: number;
     gapTolerance: number;
+    interpThreshold: number;
     minEnergyThreshold: number;
     smoothWindowSize: number;
     enableEnergyEnhancement: boolean;
@@ -21,6 +22,9 @@ interface StorageSettings {
     showEnergyMap: boolean;
     showGridLines: boolean;
     showPixelatedResult: boolean;
+    preprocessInterpFactor: number;
+    pureUpscaleMode: boolean;
+    pureUpscaleFactor: number;
   };
 }
 

@@ -102,6 +102,8 @@ export default {
     gaussianBlurDesc: 'Contrôle le degré de flou de l\'image, plus la valeur est élevée, plus le flou est fort, utilisé pour lisser le bruit',
     gapTolerance: 'Tolérance d\'espacement',
     gapToleranceDesc: 'Taille des espaces entre les lignes de grille autorisés, plus la valeur est élevée, plus il est facile de connecter les lignes brisées',
+    interpThreshold: 'Seuil d\'Interpolation',
+    interpThresholdDesc: 'Contrôle quand insérer des lignes d\'interpolation bleues entre deux lignes rouges, inséré lorsque l\'espacement dépasse l\'espacement typique × cette valeur',
     minEnergyThreshold: 'Seuil d\'énergie minimum',
     minEnergyThresholdDesc: 'Les pixels dont la valeur d\'énergie est inférieure à ce seuil seront ignorés, utilisé pour filtrer les bords faibles',
     smoothWindowSize: 'Taille de la fenêtre de lissage',

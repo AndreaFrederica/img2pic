@@ -46,6 +46,8 @@ export default {
     gaussianBlurDesc: 'Controla o nível de desfoque da imagem, valores mais altos criam mais desfoque para suavização de ruído',
     gapTolerance: 'Tolerância de Lacuna',
     gapToleranceDesc: 'Tamanho de lacuna permitido para linhas de grade, valores mais altos conectam linhas quebradas mais facilmente',
+    interpThreshold: 'Limite de Interpolação',
+    interpThresholdDesc: 'Controla quando inserir linhas de interpolação azuis entre duas linhas vermelhas, inserido quando o espaço excede o espaço típico × este valor',
     minEnergyThreshold: 'Limite Mínimo de Energia',
     minEnergyThresholdDesc: 'Pixels com energia abaixo deste limite serão ignorados, usado para filtrar bordas fracas',
     smoothWindowSize: 'Tamanho da Janela de Suavização',

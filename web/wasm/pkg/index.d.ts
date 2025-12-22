@@ -48,7 +48,7 @@ export function init_panic_hook(): void;
 /**
  * 插值缺失的网格线
  */
-export function interpolate_lines(lines: Uint32Array, limit: number, fallback_gap: number): Uint32Array;
+export function interpolate_lines(lines: Uint32Array, limit: number, fallback_gap: number, interp_threshold: number): Uint32Array;
 
 /**
  * 近似分位数计算（采样避免全排序）

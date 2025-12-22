@@ -13,6 +13,7 @@ export interface PipelineParams {
 
   // grid
   gapTolerance: number;
+  interpThreshold: number; // 插值线阈值，当间距大于 typical * interpThreshold 时插入插值线
   minEnergy: number;   // 0..1 * max(profile)
   smooth: number;      // 1D 平滑窗口
   windowSize: number;  // 0=auto

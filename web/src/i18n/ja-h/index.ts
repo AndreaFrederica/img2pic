@@ -111,6 +111,9 @@ export default {
     gapTolerance: '間隙許容度',
     gapToleranceDesc:
       '格子線の途切れを連結する許容間隙です。値が大きいほど断線を繋ぎやすくなります。',
+    interpThreshold: '補間線閾値',
+    interpThresholdDesc:
+      '二本の紅線の間に青き補間線を挿入すべき時を制御す、間隔が典型の間隔×此の値を超ゆると挿入せらる',
     minEnergyThreshold: '最小エネルギー閾値',
     minEnergyThresholdDesc:
       'この閾値未満のエネルギー画素は無視し、弱い縁を除去します。',

@@ -46,6 +46,8 @@ export default {
     gaussianBlurDesc: '이미지 블러 레벨을 제어합니다. 값이 높을수록 노이즈 평활화를 위해 더 많은 블러를 생성합니다.',
     gapTolerance: '간격 허용 오차',
     gapToleranceDesc: '그리드 라인의 허용된 간격 크기입니다. 값이 높을수록 끊어진 라인을 더 쉽게 연결합니다.',
+    interpThreshold: '보간선 임계값',
+    interpThresholdDesc: '두 빨간 선 사이에 파란색 보간선을 삽입할 시기를 제어합니다. 간격이 일반적인 간격 × 이 값보다 크면 삽입됩니다.',
     minEnergyThreshold: '최소 에너지 임계값',
     minEnergyThresholdDesc: '이 임계값보다 에너지가 낮은 픽셀은 무시됩니다. 약한 에지를 필터링하는 데 사용됩니다.',
     smoothWindowSize: '평활화 창 크기',

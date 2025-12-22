@@ -102,6 +102,8 @@ export default {
     gaussianBlurDesc: '控制圖像模糊程度，值越大越模糊，用於平滑噪聲',
     gapTolerance: '間隙容忍度',
     gapToleranceDesc: '允許網格線間隙大小，值越大越容易連接斷裂線',
+    interpThreshold: '插值線閾值',
+    interpThresholdDesc: '控制何時在兩條紅線之間插入藍色插值線，間距大於典型間距×此值時插入',
     minEnergyThreshold: '最小能量閾值',
     minEnergyThresholdDesc: '能量值低於此閾值之像素將被忽略，用於過濾弱邊緣',
     smoothWindowSize: '平滑視窗大小',

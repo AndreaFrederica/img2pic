@@ -33,6 +33,7 @@
                 :min="1"
                 :max="10"
                 :step="0.5"
+                label
               />
             </div>
 
@@ -73,7 +74,6 @@
                       :max="5"
                       :step="0.1"
                       label
-                      label-always
                       class="q-mb-md"
                     />
                   </div>
@@ -90,7 +90,23 @@
                     :min="0"
                     :max="10"
                     label
-                    label-always
+                    class="q-mb-md"
+                  />
+                </div>
+
+                <div class="q-mb-md">
+                  <div class="text-body2 q-mb-sm">
+                    {{ $t('pixelParams.interpThreshold') }}: {{ params.interpThreshold.toFixed(2) }}
+                    <q-icon name="help" size="xs" color="primary" class="cursor-pointer">
+                      <q-tooltip>{{ $t('pixelParams.interpThresholdDesc') }}</q-tooltip>
+                    </q-icon>
+                  </div>
+                  <q-slider
+                    v-model="params.interpThreshold"
+                    :min="0.5"
+                    :max="5"
+                    :step="0.05"
+                    label
                     class="q-mb-md"
                   />
                 </div>
@@ -108,7 +124,6 @@
                     :max="1"
                     :step="0.01"
                     label
-                    label-always
                     class="q-mb-md"
                   />
                 </div>
@@ -125,7 +140,6 @@
                     :min="1"
                     :max="15"
                     label
-                    label-always
                     class="q-mb-md"
                   />
                 </div>
@@ -174,7 +188,6 @@
                         :max="3"
                         :step="0.1"
                         label
-                        label-always
                         class="q-mb-md"
                       />
                     </div>
@@ -192,7 +205,6 @@
                         :max="3"
                         :step="0.1"
                         label
-                        label-always
                         class="q-mb-md"
                       />
                     </div>
@@ -215,7 +227,6 @@
                     :min="useDirectSampling ? 1 : 0"
                     :max="useDirectSampling ? 50 : 20"
                     label
-                    label-always
                     class="q-mb-md"
                   />
                 </div>
@@ -233,7 +244,6 @@
                       :min="2"
                       :max="8"
                       label
-                      label-always
                       class="q-mb-md"
                     />
                   </div>
@@ -250,7 +260,6 @@
                       :min="10"
                       :max="40"
                       label
-                      label-always
                       class="q-mb-md"
                     />
                   </div>
@@ -289,30 +298,20 @@
                   </q-toggle>
 
                   <template v-if="!useDirectSampling">
-                    <q-select
-                      v-model="params.sampleMode"
-                      :options="sampleModeOptions.filter(opt => opt.value !== 'direct')"
-                      emit-value
-                      map-options
-                      class="q-mb-md"
-                    >
-                      <template v-slot:selected>
-                        <span class="flex items-center">
-                          {{ $t('samplingMode.energyMapSampling') }}
-                          <q-icon name="help" size="xs" color="primary" class="cursor-pointer q-ml-xs">
-                            <q-tooltip>{{ $t('samplingMode.energyMapSamplingDesc') }}</q-tooltip>
-                          </q-icon>
-                        </span>
-                      </template>
-                      <template v-slot:label>
-                        <span class="flex items-center">
-                          {{ $t('samplingMode.energyMapSampling') }}
-                          <q-icon name="help" size="xs" color="primary" class="cursor-pointer q-ml-xs">
-                            <q-tooltip>{{ $t('samplingMode.energyMapSamplingDesc') }}</q-tooltip>
-                          </q-icon>
-                        </span>
-                      </template>
-                    </q-select>
+                    <div class="q-mb-md">
+                      <div class="text-body2 q-mb-sm">
+                        {{ $t('samplingMode.energyMapSampling') }}
+                        <q-icon name="help" size="xs" color="primary" class="cursor-pointer">
+                          <q-tooltip>{{ $t('samplingMode.energyMapSamplingDesc') }}</q-tooltip>
+                        </q-icon>
+                      </div>
+                      <q-select
+                        v-model="params.sampleMode"
+                        :options="sampleModeOptions.filter(opt => opt.value !== 'direct')"
+                        emit-value
+                        map-options
+                      />
+                    </div>
                   </template>
 
                   <q-toggle
@@ -342,7 +341,6 @@
                         :min="0"
                         :max="10"
                         label
-                        label-always
                         class="q-mb-md"
                       />
                     </div>
@@ -362,7 +360,6 @@
                         :max="0.9"
                         :step="0.1"
                         label
-                        label-always
                         class="q-mb-md"
                       />
                     </div>
@@ -427,7 +424,6 @@
                 :max="20"
                 :step="1"
                 label
-                label-always
               />
             </div>
 
@@ -635,6 +631,7 @@ const params = reactive<PipelineParams>({
   enhanceHorizontal: 1.0,
   enhanceVertical: 1.0,
   gapTolerance: 2,
+  interpThreshold: 1.5,
   minEnergy: 0.15,
   smooth: 3,
   windowSize: 0,
@@ -677,6 +674,7 @@ watch(
   [
     () => params.sigma,
     () => params.gapTolerance,
+    () => params.interpThreshold,
     () => params.minEnergy,
     () => params.smooth,
     () => params.enhanceEnergy,
@@ -693,6 +691,9 @@ watch(
     () => params.nativeRes,
     showDebug,
     useDirectSampling,
+    preprocessInterpFactor,
+    pureUpscaleMode,
+    pureUpscaleFactor,
   ],
   () => {
     // Debounced save to avoid excessive writes
@@ -703,6 +704,7 @@ watch(
       const pixelSettings = {
         gaussianBlur: params.sigma,
         gapTolerance: params.gapTolerance,
+        interpThreshold: params.interpThreshold,
         minEnergyThreshold: params.minEnergy,
         smoothWindowSize: params.smooth,
         enableEnergyEnhancement: params.enhanceEnergy,
@@ -721,6 +723,9 @@ watch(
         showPixelatedResult: true,
         weightedRatio: params.sampleWeightRatio,
         nativeResolution: params.nativeRes,
+        preprocessInterpFactor: preprocessInterpFactor.value,
+        pureUpscaleMode: pureUpscaleMode.value,
+        pureUpscaleFactor: pureUpscaleFactor.value,
       } as const;
       storageService.savePixelSettings(pixelSettings);
       console.log('Settings saved:', pixelSettings);
@@ -745,6 +750,7 @@ onMounted(() => {
     Object.assign(params, {
       sigma: savedPixelSettings.gaussianBlur || 1.0,
       gapTolerance: savedPixelSettings.gapTolerance || 2,
+      interpThreshold: savedPixelSettings.interpThreshold || 1.5,
       minEnergy: savedPixelSettings.minEnergyThreshold || 0.15,
       smooth: savedPixelSettings.smoothWindowSize || 3,
       enhanceEnergy: savedPixelSettings.enableEnergyEnhancement || false,
@@ -764,6 +770,11 @@ onMounted(() => {
     // Apply display settings
     showDebug.value = savedPixelSettings.showEnergyMap !== false;
     useDirectSampling.value = savedPixelSettings.sampleMode === 'direct';
+
+    // Apply UI settings
+    preprocessInterpFactor.value = savedPixelSettings.preprocessInterpFactor || 1;
+    pureUpscaleMode.value = savedPixelSettings.pureUpscaleMode || false;
+    pureUpscaleFactor.value = savedPixelSettings.pureUpscaleFactor || 4;
 
     console.log('Loaded saved settings:', savedPixelSettings);
   }

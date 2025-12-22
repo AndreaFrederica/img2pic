@@ -198,19 +198,20 @@ export async function detectGridLines(
 export async function interpolateLines(
   lines: number[],
   limit: number,
-  fallbackGap: number
+  fallbackGap: number,
+  interpThreshold: number = 1.5
 ): Promise<number[]> {
   const wasm = await getWasmIfEnabled();
   if (wasm) {
     console.log('[Render] Using WASM engine for interpolateLines');
     // 转换 number[] 为 Uint32Array（WASM 需要）
     const linesUint32 = new Uint32Array(lines);
-    const result = wasm.interpolate_lines(linesUint32, limit, fallbackGap);
+    const result = wasm.interpolate_lines(linesUint32, limit, fallbackGap, interpThreshold);
     // 转换回 number[] 以匹配 API
     return Array.from(result);
   }
   console.log('[Render] Using JS engine for interpolateLines');
-  return jsGrid.interpolateLines(lines, limit, fallbackGap);
+  return jsGrid.interpolateLines(lines, limit, fallbackGap, interpThreshold);
 }
 
 /**

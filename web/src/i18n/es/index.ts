@@ -46,6 +46,8 @@ export default {
     gaussianBlurDesc: 'Controla el nivel de desenfoque de la imagen, valores más altos crean más desenfoque para suavizar el ruido',
     gapTolerance: 'Tolerancia de Huecos',
     gapToleranceDesc: 'Tamaño de hueco permitido para líneas de cuadrícula, valores más altos conectan líneas rotas más fácilmente',
+    interpThreshold: 'Umbral de Interpolación',
+    interpThresholdDesc: 'Controla cuándo insertar líneas de interpolación azules entre dos líneas rojas, se inserta cuando el espacio excede el espacio típico × este valor',
     minEnergyThreshold: 'Umbral Mínimo de Energía',
     minEnergyThresholdDesc: 'Píxeles con energía por debajo de este umbral serán ignorados, usado para filtrar bordes débiles',
     smoothWindowSize: 'Tamaño de Ventana de Suavizado',

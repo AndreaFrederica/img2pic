@@ -160,12 +160,12 @@ export async function runPipeline(
 
     // 4) interpolate + complete edges
     const allX0 = await withWasmFallback(
-      () => interpolateLinesWasm(xLines, width, pixelSize),
-      () => interpolateLinesJs(xLines, width, pixelSize)
+      () => interpolateLinesWasm(xLines, width, pixelSize, params.interpThreshold),
+      () => interpolateLinesJs(xLines, width, pixelSize, params.interpThreshold)
     );
     const allY0 = await withWasmFallback(
-      () => interpolateLinesWasm(yLines, height, pixelSize),
-      () => interpolateLinesJs(yLines, height, pixelSize)
+      () => interpolateLinesWasm(yLines, height, pixelSize, params.interpThreshold),
+      () => interpolateLinesJs(yLines, height, pixelSize, params.interpThreshold)
     );
 
     // Calculate typical gaps
