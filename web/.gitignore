@@ -31,3 +31,10 @@ yarn-error.log*
 
 # local .env files
 .env.local*
+
+# Rust/WASM build artifacts
+/wasm/target
+/wasm/pkg
+/wasm/Cargo.lock
+*.wasm
+*.rs.bk

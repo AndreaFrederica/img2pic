@@ -1,0 +1,19 @@
+{
+  "name": "@img2pic/wasm",
+  "version": "0.1.0",
+  "description": "WebAssembly image processing module for img2pic",
+  "type": "module",
+  "main": "index.js",
+  "module": "index.js",
+  "types": "index.d.ts",
+  "files": [
+    "index_bg.wasm",
+    "index.js",
+    "index.d.ts"
+  ],
+  "scripts": {
+    "build": "wasm-pack build --target web --out-name index",
+    "build:release": "wasm-pack build --target web --out-name index --release",
+    "dev": "wasm-pack build --target web --out-name index --dev"
+  }
+}

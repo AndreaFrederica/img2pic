@@ -63,6 +63,25 @@ export default defineConfig((ctx) => {
       // extendViteConf (viteConf) {},
       // viteVuePluginOptions: {},
 
+      // WASM 支持
+      extendViteConf(viteConf) {
+        // 配置 WASM 文件加载
+        viteConf.assetsInclude = ['**/*.wasm'];
+        // 开发环境下正确处理 WASM
+        if (ctx.dev) {
+          viteConf.server = {
+            ...viteConf.server,
+            fs: {
+              allow: ['..'],
+            },
+            headers: {
+              'Cross-Origin-Opener-Policy': 'same-origin',
+              'Cross-Origin-Embedder-Policy': 'require-corp',
+            },
+          };
+        }
+      },
+
       vitePlugins: [
         [
           '@intlify/unplugin-vue-i18n/vite',
