@@ -719,9 +719,11 @@ function renderDebugImage() {
   console.log('Starting to draw grid center points...');
   let centerPointCount = 0;
   for (let i = 0; i < allXLines.length - 1; i++) {
-    const x = (allXLines[i]! + allXLines[i + 1]!) / 2;
+    // 使用与实际采样位置一致的计算方式（向下取整）
+    const x = ((allXLines[i]! + allXLines[i + 1]!) / 2) | 0;
     for (let j = 0; j < allYLines.length - 1; j++) {
-      const y = (allYLines[j]! + allYLines[j + 1]!) / 2;
+      // 使用与实际采样位置一致的计算方式（向下取整）
+      const y = ((allYLines[j]! + allYLines[j + 1]!) / 2) | 0;
       ctx.fillRect(x - 1, y - 1, 2, 2);
       centerPointCount++;
     }
