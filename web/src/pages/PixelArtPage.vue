@@ -286,7 +286,7 @@
               <q-card-section>
                 <div class="text-h6 q-mb-md">原始图片</div>
                 <div v-if="imageLoaded" class="text-center">
-                  <canvas ref="originalCanvas" style="max-width: 100%; height: auto; cursor: pointer;" @click="openImagePreview(originalCanvas, '原始图片')" />
+                  <canvas ref="originalCanvas" class="image-canvas" style="max-width: 100%; height: auto; cursor: pointer;" @click="openImagePreview(originalCanvas, '原始图片')" />
                 </div>
                 <div v-else class="text-center text-grey-6 q-pa-lg">
                   请选择要处理的图片
@@ -301,7 +301,7 @@
               <q-card-section>
                 <div class="text-h6 q-mb-md">纯能量图</div>
                 <div class="text-center">
-                  <canvas ref="energyCanvas" style="max-width: 100%; height: auto; cursor: pointer;" @click="openImagePreview(energyCanvas, '纯能量图')" />
+                  <canvas ref="energyCanvas" class="image-canvas" style="max-width: 100%; height: auto; cursor: pointer;" @click="openImagePreview(energyCanvas, '纯能量图')" />
                 </div>
               </q-card-section>
             </q-card>
@@ -313,7 +313,7 @@
               <q-card-section>
                 <div class="text-h6 q-mb-md">能量图和网格线</div>
                 <div class="text-center">
-                  <canvas ref="debugCanvas" style="max-width: 100%; height: auto; cursor: pointer;" @click="openImagePreview(debugCanvas, '能量图和网格线')" />
+                  <canvas ref="debugCanvas" class="image-canvas" style="max-width: 100%; height: auto; cursor: pointer;" @click="openImagePreview(debugCanvas, '能量图和网格线')" />
                 </div>
               </q-card-section>
             </q-card>
@@ -330,10 +330,10 @@
                     :src="pixelArtDataUrl"
                     no-native-menu
                     fit="contain"
-                    style="max-width: 100%; height: auto; cursor: pointer; background: repeating-conic-gradient(#f0f0f0 0 25%, transparent 0 50%) 0 0 / 20px 20px;"
+                    class="pixel-art-result"
                     @click="openImagePreview(null, '像素化结果')"
                   />
-                  <canvas ref="pixelCanvas" v-show="false" />
+                  <canvas ref="pixelCanvas" class="pixel-canvas" v-show="false" />
                   <div class="q-mt-md">
                     <q-btn
                       color="secondary"
@@ -1019,6 +1019,37 @@ function openImagePreview(canvas: HTMLCanvasElement | null, imageName: string) {
 .image-preview-container {
   padding: 0;
   height: calc(100vh - 60px);
+}
+
+/* 像素画样式 */
+.pixel-canvas {
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
+/* 像素画结果样式 */
+.pixel-art-result {
+  max-width: 100% !important;
+  height: auto !important;
+  cursor: pointer !important;
+  background: repeating-conic-gradient(#f0f0f0 0 25%, transparent 0 50%) 0 0 / 20px 20px !important;
+  image-rendering: pixelated !important;
+  image-rendering: -moz-crisp-edges !important;
+  image-rendering: crisp-edges !important;
+}
+
+/* 更深的选择器来覆盖Quasar的样式 */
+.q-img.pixel-art-result img,
+.q-img.pixel-art-result .q-img__image {
+  image-rendering: pixelated !important;
+  image-rendering: -moz-crisp-edges !important;
+  image-rendering: crisp-edges !important;
+}
+
+/* 图片画布样式 - 用于原始图片、能量图等（保留默认缩放） */
+.image-canvas {
+  /* 使用浏览器默认图像渲染，保持抗锯齿效果 */
 }
 
 /* 响应式：小屏幕时切换为垂直布局 */

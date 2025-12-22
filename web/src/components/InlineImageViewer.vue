@@ -16,7 +16,7 @@
             <q-img
               :src="imageSrc"
               :alt="imageName || 'image'"
-              class="viewer-img"
+              :class="['viewer-img', { 'pixelated': isPixelArtImage }]"
               fit="contain"
               :draggable="false"
             />
@@ -134,6 +134,17 @@ const pinchOffsetY = ref(0);
 
 const imageSrc = computed(() => props.src);
 const imageName = computed(() => props.name);
+
+// 判断是否为像素画图像
+const isPixelArtImage = computed(() => {
+  return imageName.value?.includes('像素化结果') ||
+         imageName.value?.includes('像素画') ||
+         imageName.value?.includes('pixel art') ||
+         imageName.value?.includes('pixel') ||
+         imageSrc.value?.startsWith('blob:') || // blob URLs from pixel art generation
+         (imageSrc.value?.length > 100 && imageSrc.value.includes('data:image/png')) // PNG data URLs
+});
+
 
 const transformStyle = computed(() => {
   const sx = scale.value * (flipX.value ? -1 : 1);
@@ -539,6 +550,13 @@ watch(
   max-width: 100%;
   max-height: 100%;
   pointer-events: none; /* 事件交给容器处理 */
+}
+
+/* 像素画图片样式 */
+.viewer-img.pixelated {
+  image-rendering: pixelated !important;
+  image-rendering: -moz-crisp-edges !important;
+  image-rendering: crisp-edges !important;
 }
 
 /* 悬浮的工具栏 */
