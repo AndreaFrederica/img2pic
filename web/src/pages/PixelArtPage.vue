@@ -1,8 +1,9 @@
 <template>
   <q-page class="q-pa-md">
-    <div class="row q-gutter-md">
+    <!-- 大屏幕水平布局：控制面板和图片区域并排 -->
+    <div class="horizontal-layout">
       <!-- 左侧控制面板 -->
-      <div class="col-12 col-md-4">
+      <div class="control-panel">
         <q-card>
           <q-card-section>
             <div class="text-h6 q-mb-md">像素化设置</div>
@@ -245,15 +246,16 @@
       </div>
 
       <!-- 右侧图片显示区域 -->
-      <div class="col-12 col-md-8">
-        <div class="row q-gutter-md">
+      <div class="image-display-area">
+        <!-- 大屏幕水平布局：所有图片在一行 -->
+        <div class="image-grid">
           <!-- 原始图片 -->
-          <div class="col-12" :class="showDebug ? 'col-sm-6' : ''">
+          <div class="image-card">
             <q-card>
               <q-card-section>
                 <div class="text-h6 q-mb-md">原始图片</div>
                 <div v-if="imageLoaded" class="text-center">
-                  <canvas ref="originalCanvas" style="max-width: 100%; height: auto;" />
+                  <canvas ref="originalCanvas" style="max-width: 100%; height: auto; cursor: pointer;" @click="openImagePreview(originalCanvas, '原始图片')" />
                 </div>
                 <div v-else class="text-center text-grey-6 q-pa-lg">
                   请选择要处理的图片
@@ -262,29 +264,49 @@
             </q-card>
           </div>
 
+          <!-- 纯能量图（调试模式） -->
+          <div v-if="showDebug && result" class="image-card">
+            <q-card>
+              <q-card-section>
+                <div class="text-h6 q-mb-md">纯能量图</div>
+                <div class="text-center">
+                  <canvas ref="energyCanvas" style="max-width: 100%; height: auto; cursor: pointer;" @click="openImagePreview(energyCanvas, '纯能量图')" />
+                </div>
+              </q-card-section>
+            </q-card>
+          </div>
+
           <!-- 能量图和网格线（调试模式） -->
-          <div v-if="showDebug && result" class="col-12 col-sm-6">
+          <div v-if="showDebug && result" class="image-card">
             <q-card>
               <q-card-section>
                 <div class="text-h6 q-mb-md">能量图和网格线</div>
                 <div class="text-center">
-                  <canvas ref="debugCanvas" style="max-width: 100%; height: auto;" />
+                  <canvas ref="debugCanvas" style="max-width: 100%; height: auto; cursor: pointer;" @click="openImagePreview(debugCanvas, '能量图和网格线')" />
                 </div>
               </q-card-section>
             </q-card>
           </div>
 
           <!-- 像素化结果 -->
-          <div v-if="result && result.pixelArt" class="col-12">
+          <div v-if="result && result.pixelArt" class="image-card">
             <q-card>
               <q-card-section>
                 <div class="text-h6 q-mb-md">像素化结果</div>
                 <div class="text-center">
-                  <canvas ref="pixelCanvas" style="max-width: 100%; height: auto;" />
+                  <canvas ref="pixelCanvas" style="max-width: 100%; height: auto; cursor: pointer;" @click="openImagePreview(pixelCanvas, '像素化结果')" />
                   <div class="q-mt-md">
                     <q-btn
                       color="secondary"
-                      label="下载能量图"
+                      label="下载纯能量图"
+                      @click="downloadEnergy"
+                      icon="download"
+                      class="q-mr-md"
+                      v-if="showDebug"
+                    />
+                    <q-btn
+                      color="secondary"
+                      label="下载能量图+网格"
                       @click="downloadDebug"
                       icon="download"
                       class="q-mr-md"
@@ -304,6 +326,25 @@
         </div>
       </div>
     </div>
+
+    <!-- 图片预览器对话框 -->
+    <q-dialog v-model="imagePreviewDialog" maximized>
+      <q-card class="image-preview-dialog">
+        <q-card-section class="row items-center q-pb-none">
+          <div class="text-h6">{{ previewImageName }}</div>
+          <q-space />
+          <q-btn icon="close" flat round dense v-close-popup />
+        </q-card-section>
+
+        <q-card-section class="image-preview-container">
+          <InlineImageViewer
+            :src="previewImageSrc"
+            :name="previewImageName"
+            style="width: 100%; height: 100%;"
+          />
+        </q-card-section>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 
@@ -313,6 +354,7 @@ import { useQuasar } from 'quasar';
 import { saveAs } from 'file-saver';
 import { createPixelWorker } from 'src/pixel/workerApi';
 import type { PipelineParams, PipelineResult } from 'src/pixel/types';
+import InlineImageViewer from 'src/components/InlineImageViewer.vue';
 
 const $q = useQuasar();
 
@@ -320,12 +362,18 @@ const $q = useQuasar();
 const selectedFile = ref<File | null>(null);
 const originalCanvas = ref<HTMLCanvasElement | null>(null);
 const imageLoaded = ref(false);
+const energyCanvas = ref<HTMLCanvasElement | null>(null);
 const debugCanvas = ref<HTMLCanvasElement | null>(null);
 const pixelCanvas = ref<HTMLCanvasElement | null>(null);
 const processing = ref(false);
 const showDebug = ref(true); // 默认开启调试模式，方便查看能量图和网格线
 const result = ref<PipelineResult | null>(null);
 let workerInstance: ReturnType<typeof createPixelWorker> | null = null;
+
+// 图片预览器状态
+const imagePreviewDialog = ref(false);
+const previewImageSrc = ref('');
+const previewImageName = ref('');
 
 // 能量算法参数
 const params = reactive<PipelineParams>({
@@ -462,25 +510,29 @@ async function processImage() {
     // 保存结果
     result.value = resultData;
 
-    // 显示能量图和网格线
-    if (showDebug.value) {
-      console.log('Rendering debug image...');
-      renderDebugImage();
-    } else {
-      console.log('Debug mode is off, not rendering debug image');
-    }
-
-    // 添加调试信息显示当前状态
-    console.log('Current debug mode:', showDebug.value);
-
     // 显示像素画
     if (resultData.pixelArt) {
       console.log('Rendering pixel art...');
       // 使用 nextTick 确保 pixelCanvas 元素已渲染
       await nextTick();
+      console.log('pixelCanvas available:', !!pixelCanvas.value);
       renderPixelArt();
     } else {
       console.log('No pixel art data to render');
+    }
+
+    // 如果调试模式开启，再次确保 Canvas 已渲染
+    if (showDebug.value) {
+      console.log('Ensuring debug canvases are rendered...');
+      await nextTick();
+      console.log('energyCanvas available after nextTick:', !!energyCanvas.value);
+      console.log('debugCanvas available after nextTick:', !!debugCanvas.value);
+      if (energyCanvas.value) {
+        renderEnergyImage();
+      }
+      if (debugCanvas.value) {
+        renderDebugImage();
+      }
     }
 
     $q.notify({
@@ -498,6 +550,35 @@ async function processImage() {
   }
 }
 
+// 渲染纯能量图（没有网格线和绿点）
+function renderEnergyImage() {
+  if (!result.value || !energyCanvas.value) return;
+
+  const { width, height, energyU8 } = result.value;
+
+  energyCanvas.value.width = width;
+  energyCanvas.value.height = height;
+
+  const ctx = energyCanvas.value.getContext('2d')!;
+
+  // 绘制能量图（灰度）
+  console.log('Drawing pure energy map...');
+  const energyData = new Uint8Array(energyU8);
+  const imageData = ctx.createImageData(width, height);
+
+  for (let i = 0; i < energyData.length; i++) {
+    const value = energyData[i] || 0;
+    const idx = i * 4;
+    imageData.data[idx] = value;     // R
+    imageData.data[idx + 1] = value; // G
+    imageData.data[idx + 2] = value; // B
+    imageData.data[idx + 3] = 255;   // A
+  }
+
+  ctx.putImageData(imageData, 0, 0);
+  console.log('Pure energy image rendering completed');
+}
+
 // 渲染调试图像（能量图+网格线）
 function renderDebugImage() {
   if (!result.value || !debugCanvas.value) return;
@@ -509,7 +590,8 @@ function renderDebugImage() {
 
   const ctx = debugCanvas.value.getContext('2d')!;
 
-  // 绘制能量图
+  // 绘制能量图（灰度）
+  console.log('Drawing energy map...');
   const energyData = new Uint8Array(energyU8);
   const imageData = ctx.createImageData(width, height);
 
@@ -525,14 +607,10 @@ function renderDebugImage() {
   ctx.putImageData(imageData, 0, 0);
   console.log('Energy image data drawn to canvas');
 
-  // 强制触发 Vue 重新渲染
-  // eslint-disable-next-line @typescript-eslint/no-floating-promises
-  void nextTick();
-
   // 绘制检测到的网格线（红色）
   ctx.strokeStyle = 'red';
   ctx.lineWidth = 1;
-  console.log('Starting to draw grid lines...');
+  console.log('Starting to draw detected grid lines...', { xLines: xLines.length, yLines: yLines.length });
 
   for (const x of xLines) {
     ctx.beginPath();
@@ -548,9 +626,12 @@ function renderDebugImage() {
     ctx.stroke();
   }
 
+  console.log('Detected grid lines drawn');
+
   // 绘制插值后的网格线（蓝色）
   ctx.strokeStyle = 'blue';
   ctx.lineWidth = 1;
+  console.log('Starting to draw interpolated grid lines...', { allXLines: allXLines.length, allYLines: allYLines.length });
 
   for (const x of allXLines) {
     if (!xLines.includes(x)) {
@@ -570,21 +651,21 @@ function renderDebugImage() {
     }
   }
 
+  console.log('Interpolated grid lines drawn');
+
   // 绘制网格中心点（绿色）
   ctx.fillStyle = 'green';
   console.log('Starting to draw grid center points...');
+  let centerPointCount = 0;
   for (let i = 0; i < allXLines.length - 1; i++) {
     const x = (allXLines[i]! + allXLines[i + 1]!) / 2;
     for (let j = 0; j < allYLines.length - 1; j++) {
       const y = (allYLines[j]! + allYLines[j + 1]!) / 2;
       ctx.fillRect(x - 1, y - 1, 2, 2);
+      centerPointCount++;
     }
   }
-  console.log('Debug image rendering completed');
-
-  // 再次强制触发 Vue 重新渲染，确保 UI 更新
-  // eslint-disable-next-line @typescript-eslint/no-floating-promises
-  void nextTick();
+  console.log('Debug image rendering completed', { centerPointCount });
 }
 
 // 渲染像素画
@@ -617,7 +698,18 @@ function renderPixelArt() {
   ctx.imageSmoothingEnabled = false;
 }
 
-// 下载调试图像
+// 下载纯能量图
+function downloadEnergy() {
+  if (!energyCanvas.value) return;
+
+  energyCanvas.value.toBlob((blob) => {
+    if (blob) {
+      saveAs(blob, `energy_${Date.now()}.png`);
+    }
+  });
+}
+
+// 下载调试图像（能量图+网格线）
 function downloadDebug() {
   if (!debugCanvas.value) return;
 
@@ -638,4 +730,74 @@ function downloadPixelArt() {
     }
   });
 }
+
+// 打开图片预览器
+function openImagePreview(canvas: HTMLCanvasElement | null, imageName: string) {
+  if (!canvas) return;
+
+  previewImageName.value = imageName;
+  previewImageSrc.value = canvas.toDataURL();
+  imagePreviewDialog.value = true;
+}
 </script>
+
+<style scoped>
+/* 强制水平布局 */
+.horizontal-layout {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 1rem;
+  width: 100%;
+  min-height: 600px;
+}
+
+.control-panel {
+  flex: 0 0 35%;
+  min-width: 350px;
+  max-width: 400px;
+}
+
+.image-display-area {
+  flex: 1;
+  min-width: 0;
+}
+
+.image-grid {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.image-card {
+  flex: 1;
+  min-width: 200px;
+}
+
+/* 图片预览器样式 */
+.image-preview-dialog {
+  width: 100%;
+  height: 100%;
+}
+
+.image-preview-container {
+  padding: 0;
+  height: calc(100vh - 60px);
+}
+
+/* 响应式：小屏幕时切换为垂直布局 */
+@media (max-width: 768px) {
+  .horizontal-layout {
+    flex-direction: column !important;
+  }
+
+  .control-panel {
+    flex: 1;
+    max-width: none;
+    min-width: auto;
+  }
+
+  .image-grid {
+    flex-direction: column;
+  }
+}
+</style>

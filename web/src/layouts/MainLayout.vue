@@ -43,9 +43,9 @@ const linksList: EssentialLinkProps[] = [
   },
   {
     title: 'Github',
-    caption: 'github.com/quasarframework',
+    caption: 'github.com/AndreaFrederica',
     icon: 'code',
-    link: 'https://github.com/quasarframework',
+    link: 'https://github.com/AndreaFrederica/img2pic',
   },
 ];
 
