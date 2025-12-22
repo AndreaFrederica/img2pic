@@ -121,7 +121,9 @@ export default {
     minPixelSize: '最小像素大小',
     minPixelSizeDesc: '自動檢測時允許之最小像素大小',
     maxPixelSize: '最大像素大小',
-    maxPixelSizeDesc: '自動檢測時允許之最大像素大小'
+    maxPixelSizeDesc: '自動檢測時允許之最大像素大小',
+    preprocessInterp: '預處理插值',
+    preprocessInterpDesc: '在處理前先對圖片進行插值放大，可以提高網格識別效果。使用最近鄰插值保持像素邊緣清晰。'
   },
 
   // 採樣模式
@@ -153,6 +155,8 @@ export default {
     startProcessingDesc: '根據當前參數處理圖像，生成像素藝術',
     showEnergyMapAndGrid: '顯示能量圖和網格線',
     showEnergyMapAndGridDesc: '在結果區域顯示能量圖與檢測到之網格線，用於調試與檢查檢測效果',
+    pureUpscaleMode: '純比例放大模式',
+    pureUpscaleModeDesc: '跳過所有檢測和處理，直接用最近鄰插值放大圖片（適用於已經是像素畫的圖片）',
     downloadPureEnergyMap: '下載純能量圖',
     downloadPureEnergyMapDesc: '下載僅含能量信息之灰度圖像，不含網格線',
     downloadEnergyMapWithGrid: '下載能量圖+網格',
@@ -191,9 +195,9 @@ export default {
     notLoaded: 'WASM 模組未加載，點擊下方按鈕預加載',
     preload: '預加載 WASM 模組',
     performanceInfo: 'WASM 加速可提升以下操作之性能：',
-    performanceConvolution: '大圖像卷積運算（2-5倍速度）',
-    performanceSobel: '邊緣檢測（2-3倍速度）',
-    performanceSampling: '像素採樣（1.5-2倍速度）'
+    performanceConvolution: '大圖像卷積運算（1.5-3倍速度）',
+    performanceSobel: '邊緣檢測（1.5-2倍速度）',
+    performanceSampling: '像素採樣（1.2-1.5倍速度）'
   },
 
   // 語言切換

@@ -65,7 +65,9 @@ export default {
     minPixelSize: 'Minimum Pixel Size',
     minPixelSizeDesc: 'Minimum allowed pixel size when auto-detecting',
     maxPixelSize: 'Maximum Pixel Size',
-    maxPixelSizeDesc: 'Maximum allowed pixel size when auto-detecting'
+    maxPixelSizeDesc: 'Maximum allowed pixel size when auto-detecting',
+    preprocessInterp: 'Preprocess Interpolation',
+    preprocessInterpDesc: 'Interpolate and upscale the image before processing to improve grid detection. Uses nearest-neighbor interpolation to keep pixel edges sharp.'
   },
 
   // Sampling mode
@@ -97,6 +99,8 @@ export default {
     startProcessingDesc: 'Start processing the image to generate pixel art based on current parameters',
     showEnergyMapAndGrid: 'Show Energy Map and Grid',
     showEnergyMapAndGridDesc: 'Display energy map and detected grid lines in the results area for debugging and viewing detection effects',
+    pureUpscaleMode: 'Pure Upscale Mode',
+    pureUpscaleModeDesc: 'Skip all detection and processing, directly upscale image using nearest-neighbor interpolation (for images that are already pixel art)',
     downloadPureEnergyMap: 'Download Pure Energy Map',
     downloadPureEnergyMapDesc: 'Download grayscale image containing only energy information, without grid lines',
     downloadEnergyMapWithGrid: 'Download Energy Map+Grid',
@@ -135,9 +139,9 @@ export default {
     notLoaded: 'WASM module not loaded, click the button below to preload',
     preload: 'Preload WASM Module',
     performanceInfo: 'WASM acceleration improves performance for:',
-    performanceConvolution: 'Large image convolution (2-5x faster)',
-    performanceSobel: 'Edge detection (2-3x faster)',
-    performanceSampling: 'Pixel sampling (1.5-2x faster)'
+    performanceConvolution: 'Large image convolution (1.5-3x faster)',
+    performanceSobel: 'Edge detection (1.5-2x faster)',
+    performanceSampling: 'Pixel sampling (1.2-1.5x faster)'
   },
 
   // Home page

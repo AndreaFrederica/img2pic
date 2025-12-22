@@ -65,7 +65,9 @@ export default {
     minPixelSize: 'न्यूनतम पिक्सेल साइज़',
     minPixelSizeDesc: 'ऑटो-डिटेक्ट करते समय न्यूनतम अनुमत पिक्सेल साइज़',
     maxPixelSize: 'अधिकतम पिक्सेल साइज़',
-    maxPixelSizeDesc: 'ऑटो-डिटेक्ट करते समय अधिकतम अनुमत पिक्सेल साइज़'
+    maxPixelSizeDesc: 'ऑटो-डिटेक्ट करते समय अधिकतम अनुमत पिक्सेल साइज़',
+    preprocessInterp: 'प्रीप्रोसेसिंग इंटरपोलेशन',
+    preprocessInterpDesc: 'ग्रिड डिटेक्शन में सुधार के लिए प्रोसेसिंग से पहले छवि को इंटरपोलेट और अपस्केल करें। पिक्सेल किनारों को तीक्ष्ण रखने के लिए नियरेस्ट-नेबर इंटरपोलेशन का उपयोग करता है।'
   },
 
   // Sampling mode
@@ -97,6 +99,8 @@ export default {
     startProcessingDesc: 'वर्तमान पैरामीटर के आधार पर पिक्सेल आर्ट जेनरेट करने के लिए चित्र प्रसंस्करण प्रारंभ करें',
     showEnergyMapAndGrid: 'ऊर्जा मैप और ग्रिड दिखाएं',
     showEnergyMapAndGridDesc: 'डिबग करने और डिटेक्शन प्रभाव देखने के लिए परिणाम क्षेत्र में ऊर्जा मैप और डिटेक्टेड ग्रिड लाइनें प्रदर्शित करें',
+    pureUpscaleMode: 'शुद्ध अपस्केल मोड',
+    pureUpscaleModeDesc: 'सभी पहचान और प्रसंस्करण को छोड़ें, निकटतम-पड़ोसी इंटरपोलेशन का उपयोग करके सीधे छवि को अपस्केल करें (जो छवियों के लिए जो पहले से पिक्सेल आर्ट हैं)',
     downloadPureEnergyMap: 'शुद्ध ऊर्जा मैप डाउनलोड करें',
     downloadPureEnergyMapDesc: 'केवल ऊर्जा जानकारी युक्त ग्रेस्केल चित्र डाउनलोड करें, बिना ग्रिड लाइनों के',
     downloadEnergyMapWithGrid: 'ऊर्जा मैप+ग्रिड डाउनलोड करें',
@@ -135,9 +139,9 @@ export default {
     notLoaded: 'WASM मॉड्यूल लोड नहीं हुआ',
     preload: 'WASM मॉड्यूल प्रीलोड करें',
     performanceInfo: 'WASM त्वरण निम्नलिखित के प्रदर्शन में सुधार करता है:',
-    performanceConvolution: 'बड़ा छवि कनवल्शन (2-5x तेज)',
-    performanceSobel: 'किनारा का पता लगाना (2-3x तेज)',
-    performanceSampling: 'पिक्सेल नमूनाकरण (1.5-2x तेज)'
+    performanceConvolution: 'बड़ा छवि कनवल्शन (1.5-3x तेज)',
+    performanceSobel: 'किनारा का पता लगाना (1.5-2x तेज)',
+    performanceSampling: 'पिक्सेल नमूनाकरण (1.2-1.5x तेज)'
   },
 
   // Home page

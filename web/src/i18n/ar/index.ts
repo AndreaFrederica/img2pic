@@ -65,7 +65,9 @@ export default {
     minPixelSize: 'الحد الأدنى لحجم البكسل',
     minPixelSizeDesc: 'الحد الأدنى المسموح به لحجم البكسل عند الكشف التلقائي',
     maxPixelSize: 'الحد الأقصى لحجم البكسل',
-    maxPixelSizeDesc: 'الحد الأقصى المسموح به لحجم البكسل عند الكشف التلقائي'
+    maxPixelSizeDesc: 'الحد الأقصى المسموح به لحجم البكسل عند الكشف التلقائي',
+    preprocessInterp: 'الاستيفاء المسبق',
+    preprocessInterpDesc: 'استيفاء وتكبير الصورة قبل المعالجة لتحسين كشف الشبكة. يستخدم استيفاء أقرب جار للحفاظ على حواف البكسل حادة.'
   },
 
   // Sampling mode
@@ -97,6 +99,8 @@ export default {
     startProcessingDesc: 'بدء معالجة الصورة لتوليد فن البكسل بناءً على المعلمات الحالية',
     showEnergyMapAndGrid: 'إظهار خريطة الطاقة والشبكة',
     showEnergyMapAndGridDesc: 'عرض خريطة الطاقة وخطوط الشبكة المكتشفة في منطقة النتائج لتصحيح الأخطاء وعرض آثار الكشف',
+    pureUpscaleMode: 'وضع التكبير النقي',
+    pureUpscaleModeDesc: 'تخطي جميع الكشف والمعالجة، وتكبير الصورة مباشرة باستخدام استيفاء أقرب جار (للصور التي هي بالفعل فن بكسل)',
     downloadPureEnergyMap: 'تنزيل خريطة الطاقة النقية',
     downloadPureEnergyMapDesc: 'تنزيل صورة بالدرجات الرمادية تحتوي فقط على معلومات الطاقة، بدون خطوط شبكة',
     downloadEnergyMapWithGrid: 'تنزيل خريطة الطاقة+الشبكة',
@@ -135,9 +139,9 @@ export default {
     notLoaded: 'وحدة WASM غير محملة',
     preload: 'التحميل المسبق لوحدة WASM',
     performanceInfo: 'يحسن تسريع WASM الأداء لـ:',
-    performanceConvolution: 'التفاف الصور الكبيرة (2-5 أسرع)',
-    performanceSobel: 'كشف الحواف (2-3 أسرع)',
-    performanceSampling: 'أخذ العينات البكسلية (1.5-2 أسرع)'
+    performanceConvolution: 'التفاف الصور الكبيرة (1.5-3 أسرع)',
+    performanceSobel: 'كشف الحواف (1.5-2 أسرع)',
+    performanceSampling: 'أخذ العينات البكسلية (1.2-1.5 أسرع)'
   },
 
   // Home page

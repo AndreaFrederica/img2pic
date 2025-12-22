@@ -65,7 +65,9 @@ export default {
     minPixelSize: 'Tamanho Mínimo do Pixel',
     minPixelSizeDesc: 'Tamanho mínimo de pixel permitido ao detectar automaticamente',
     maxPixelSize: 'Tamanho Máximo do Pixel',
-    maxPixelSizeDesc: 'Tamanho máximo de pixel permitido ao detectar automaticamente'
+    maxPixelSizeDesc: 'Tamanho máximo de pixel permitido ao detectar automaticamente',
+    preprocessInterp: 'Interpolação de Pré-processamento',
+    preprocessInterpDesc: 'Interpola e escala a imagem antes do processamento para melhorar a detecção de grade. Usa interpolação nearest-neighbor para manter as bordas dos pixels nítidas.'
   },
 
   // Sampling mode
@@ -97,6 +99,8 @@ export default {
     startProcessingDesc: 'Iniciar o processamento da imagem para gerar arte pixel baseada nos parâmetros atuais',
     showEnergyMapAndGrid: 'Mostrar Mapa de Energia e Grade',
     showEnergyMapAndGridDesc: 'Mostrar mapa de energia e linhas de grade detectadas na área de resultados para depurar e visualizar efeitos de detecção',
+    pureUpscaleMode: 'Modo de Escala Puro',
+    pureUpscaleModeDesc: 'Pular toda detecção e processamento, escalar diretamente a imagem usando interpolação de vizinho mais próximo (para imagens que já são arte pixel)',
     downloadPureEnergyMap: 'Baixar Mapa de Energia Puro',
     downloadPureEnergyMapDesc: 'Baixar imagem em tons de cinza contendo apenas informações de energia, sem linhas de grade',
     downloadEnergyMapWithGrid: 'Baixar Mapa de Energia+Grade',
@@ -135,9 +139,9 @@ export default {
     notLoaded: 'Módulo WASM não carregado',
     preload: 'Pré-carregar módulo WASM',
     performanceInfo: 'A aceleração WASM melhora o desempenho de:',
-    performanceConvolution: 'Grande convolução de imagem (2-5x mais rápido)',
-    performanceSobel: 'Detecção de bordas (2-3x mais rápido)',
-    performanceSampling: 'Amostragem de pixel (1.5-2x mais rápido)'
+    performanceConvolution: 'Grande convolução de imagem (1.5-3x mais rápido)',
+    performanceSobel: 'Detecção de bordas (1.5-2x mais rápido)',
+    performanceSampling: 'Amostragem de pixel (1.2-1.5x mais rápido)'
   },
 
   // Home page

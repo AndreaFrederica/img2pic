@@ -65,7 +65,9 @@ export default {
     minPixelSize: '최소 픽셀 크기',
     minPixelSizeDesc: '자동 감지 시 허용되는 최소 픽셀 크기입니다.',
     maxPixelSize: '최대 픽셀 크기',
-    maxPixelSizeDesc: '자동 감지 시 허용되는 최대 픽셀 크기입니다.'
+    maxPixelSizeDesc: '자동 감지 시 허용되는 최대 픽셀 크기입니다.',
+    preprocessInterp: '전처리 보간',
+    preprocessInterpDesc: '처리 전에 이미지를 보간하여 업스케일하여 그리드 감지를 개선합니다. 최근접 이웃 보간을 사용하여 픽셀 가장자리를 선명하게 유지합니다.'
   },
 
   // Sampling mode
@@ -97,6 +99,8 @@ export default {
     startProcessingDesc: '현재 매개변수를 기반으로 픽셀 아트를 생성하기 위해 이미지 처리를 시작합니다.',
     showEnergyMapAndGrid: '에너지 맵 및 그리드 표시',
     showEnergyMapAndGridDesc: '디버깅 및 감지 효과 보기를 위해 결과 영역에 에너지 맵과 감지된 그리드 라인을 표시합니다.',
+    pureUpscaleMode: '순수 업스케일 모드',
+    pureUpscaleModeDesc: '모든 감지와 처리를 건너뛰고, 최근접 이웃 보간을 사용하여 이미지를 직접 업스케일합니다 (이미 픽셀 아트인 이미지용)',
     downloadPureEnergyMap: '순수 에너지 맵 다운로드',
     downloadPureEnergyMapDesc: '그리드 라인 없이 에너지 정보만 포함하는 그레이스케일 이미지를 다운로드합니다.',
     downloadEnergyMapWithGrid: '에너지 맵+그리드 다운로드',
@@ -135,9 +139,9 @@ export default {
     notLoaded: 'WASM 모듈이 로드되지 않음',
     preload: 'WASM 모듈 사전 로드',
     performanceInfo: 'WASM 가속은 다음 작업의 성능을 향상시킵니다:',
-    performanceConvolution: '대형 이미지 컨볼루션 (2-5배 더 빠름)',
-    performanceSobel: '에지 감지 (2-3배 더 빠름)',
-    performanceSampling: '픽셀 샘플링 (1.5-2배 더 빠름)'
+    performanceConvolution: '대형 이미지 컨볼루션 (1.5-3배 더 빠름)',
+    performanceSobel: '에지 감지 (1.5-2배 더 빠름)',
+    performanceSampling: '픽셀 샘플링 (1.2-1.5배 더 빠름)'
   },
 
   // Home page

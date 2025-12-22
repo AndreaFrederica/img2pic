@@ -65,7 +65,9 @@ export default {
     minPixelSize: 'Tamaño Mínimo de Píxel',
     minPixelSizeDesc: 'Tamaño mínimo de píxel permitido al detectar automáticamente',
     maxPixelSize: 'Tamaño Máximo de Píxel',
-    maxPixelSizeDesc: 'Tamaño máximo de píxel permitido al detectar automáticamente'
+    maxPixelSizeDesc: 'Tamaño máximo de píxel permitido al detectar automáticamente',
+    preprocessInterp: 'Interpolación de Preprocesamiento',
+    preprocessInterpDesc: 'Interpolar y escalar la imagen antes del procesamiento para mejorar la detección de cuadrícula. Usa interpolación de vecino más cercano para mantener los bordes de píxeles nítidos.'
   },
 
   // Sampling mode
@@ -97,6 +99,8 @@ export default {
     startProcessingDesc: 'Iniciar el procesamiento de la imagen para generar arte píxel basado en los parámetros actuales',
     showEnergyMapAndGrid: 'Mostrar Mapa de Energía y Cuadrícula',
     showEnergyMapAndGridDesc: 'Mostrar mapa de energía y líneas de cuadrícula detectadas en el área de resultados para depurar y ver efectos de detección',
+    pureUpscaleMode: 'Modo de Escalado Puro',
+    pureUpscaleModeDesc: 'Omitir toda la detección y el procesamiento, escalar directamente la imagen usando interpolación de vecino más cercano (para imágenes que ya son arte píxel)',
     downloadPureEnergyMap: 'Descargar Mapa de Energía Puro',
     downloadPureEnergyMapDesc: 'Descargar imagen en escala de grises que contiene solo información de energía, sin líneas de cuadrícula',
     downloadEnergyMapWithGrid: 'Descargar Mapa de Energía+Cuadrícula',
@@ -135,9 +139,9 @@ export default {
     notLoaded: 'Módulo WASM no cargado',
     preload: 'Precargar módulo WASM',
     performanceInfo: 'La aceleración WASM mejora el rendimiento de:',
-    performanceConvolution: 'Convolución de imágenes grandes (2-5x más rápido)',
-    performanceSobel: 'Detección de bordes (2-3x más rápido)',
-    performanceSampling: 'Muestreo de píxeles (1.5-2x más rápido)'
+    performanceConvolution: 'Convolución de imágenes grandes (1.5-3x más rápido)',
+    performanceSobel: 'Detección de bordes (1.5-2x más rápido)',
+    performanceSampling: 'Muestreo de píxeles (1.2-1.5x más rápido)'
   },
 
   // Home page

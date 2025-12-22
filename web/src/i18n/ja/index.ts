@@ -121,7 +121,9 @@ export default {
     minPixelSize: '最小ピクセルサイズ',
     minPixelSizeDesc: '自動検出時の許容最小ピクセルサイズ',
     maxPixelSize: '最大ピクセルサイズ',
-    maxPixelSizeDesc: '自動検出時の許容最大ピクセルサイズ'
+    maxPixelSizeDesc: '自動検出時の許容最大ピクセルサイズ',
+    preprocessInterp: '前処理補間',
+    preprocessInterpDesc: '処理前に画像を補間して拡大し、グリッド検出の精度を向上させます。最近傍補間を使用してピクセル境界を鮮明に保ちます。'
   },
 
   // サンプリングモード
@@ -153,6 +155,8 @@ export default {
     startProcessingDesc: '現在のパラメータに基づいて画像を処理し、ピクセルアートを生成',
     showEnergyMapAndGrid: 'エネルギーマップとグリッド線を表示',
     showEnergyMapAndGridDesc: '結果領域にエネルギーマップと検出されたグリッド線を表示し、デバッグと検出効果の確認に使用',
+    pureUpscaleMode: '純粋拡大モード',
+    pureUpscaleModeDesc: 'すべての検出と処理をスキップし、最近傍補間で画像を直接拡大（既にピクセルアートである画像向け）',
     downloadPureEnergyMap: '純粋エネルギーマップをダウンロード',
     downloadPureEnergyMapDesc: 'グリッド線を含まないエネルギー情報のみのグレースケール画像をダウンロード',
     downloadEnergyMapWithGrid: 'エネルギーマップ+グリッドをダウンロード',
@@ -191,9 +195,9 @@ export default {
     notLoaded: 'WASM モジュールがロードされていません。下のボタンをクリックしてプリロードしてください',
     preload: 'WASM モジュールをプリロード',
     performanceInfo: 'WASM アクセラレーションは以下の操作のパフォーマンスを向上させます：',
-    performanceConvolution: '大画像の畳み込み演算（2-5倍速）',
-    performanceSobel: 'エッジ検出（2-3倍速）',
-    performanceSampling: 'ピクセルサンプリング（1.5-2倍速）'
+    performanceConvolution: '大画像の畳み込み演算（1.5-3倍速）',
+    performanceSobel: 'エッジ検出（1.5-2倍速）',
+    performanceSampling: 'ピクセルサンプリング（1.2-1.5倍速）'
   },
 
   // 言語切り替え

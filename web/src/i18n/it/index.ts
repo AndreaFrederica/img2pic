@@ -65,7 +65,9 @@ export default {
     minPixelSize: 'Dimensione Minima Pixel',
     minPixelSizeDesc: 'Dimensione minima pixel consentita durante il rilevamento automatico',
     maxPixelSize: 'Dimensione Massima Pixel',
-    maxPixelSizeDesc: 'Dimensione massima pixel consentita durante il rilevamento automatico'
+    maxPixelSizeDesc: 'Dimensione massima pixel consentita durante il rilevamento automatico',
+    preprocessInterp: 'Interpolazione Preelaborazione',
+    preprocessInterpDesc: 'Interpola e scala l\'immagine prima dell\'elaborazione per migliorare il rilevamento della griglia. Usa l\'interpolazione nearest-neighbor per mantenere nitidi i bordi dei pixel.'
   },
 
   // Sampling mode
@@ -97,6 +99,8 @@ export default {
     startProcessingDesc: 'Avvia l\'elaborazione dell\'immagine per generare arte pixel basata sui parametri attuali',
     showEnergyMapAndGrid: 'Mostra Mappa Energia e Griglia',
     showEnergyMapAndGridDesc: 'Mostra mappa energia e linee griglia rilevate nell\'area risultati per debug e visualizzare gli effetti di rilevamento',
+    pureUpscaleMode: 'Modalità Upscale Puro',
+    pureUpscaleModeDesc: 'Salta tutto il rilevamento e l\'elaborazione, scala direttamente l\'immagine usando l\'interpolazione nearest-neighbor (per immagini che sono già pixel art)',
     downloadPureEnergyMap: 'Scarica Mappa Energia Pura',
     downloadPureEnergyMapDesc: 'Scarica immagine in scala di grigi contenente solo informazioni energetiche, senza linee griglia',
     downloadEnergyMapWithGrid: 'Scarica Mappa Energia+Griglia',
@@ -135,9 +139,9 @@ export default {
     notLoaded: 'Modulo WASM non caricato',
     preload: 'Precarica modulo WASM',
     performanceInfo: 'L\'accelerazione WASM migliora le prestazioni di:',
-    performanceConvolution: 'Grande convoluzione immagini (2-5x più veloce)',
-    performanceSobel: 'Rilevamento bordi (2-3x più veloce)',
-    performanceSampling: 'Campionamento pixel (1.5-2x più veloce)'
+    performanceConvolution: 'Grande convoluzione immagini (1.5-3x più veloce)',
+    performanceSobel: 'Rilevamento bordi (1.5-2x più veloce)',
+    performanceSampling: 'Campionamento pixel (1.2-1.5x più veloce)'
   },
 
   // Home page

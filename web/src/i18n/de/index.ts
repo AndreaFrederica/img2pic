@@ -65,7 +65,9 @@ export default {
     minPixelSize: 'Mindestpixelgröße',
     minPixelSizeDesc: 'Mindestzulässige Pixelgröße bei automatischer Erkennung',
     maxPixelSize: 'Maximale Pixelgröße',
-    maxPixelSizeDesc: 'Maximal zulässige Pixelgröße bei automatischer Erkennung'
+    maxPixelSizeDesc: 'Maximal zulässige Pixelgröße bei automatischer Erkennung',
+    preprocessInterp: 'Vorverarbeitungs-Interpolation',
+    preprocessInterpDesc: 'Bild vor der Verarbeitung interpolieren und hochskalieren, um die Gittererkennung zu verbessern. Verwendet Nearest-Neighbor-Interpolation, um Pixelkanten scharf zu halten.'
   },
 
   // Sampling mode
@@ -97,6 +99,8 @@ export default {
     startProcessingDesc: 'Bildverarbeitung starten, um Pixel-Art basierend auf aktuellen Parametern zu generieren',
     showEnergyMapAndGrid: 'Energiekarte und Gitter anzeigen',
     showEnergyMapAndGridDesc: 'Energiekarte und erkannte Gitterlinien im Ergebnisbereich anzeigen zum Debuggen und Anzeigen der Erkennungseffekte',
+    pureUpscaleMode: 'Reiner Upscale-Modus',
+    pureUpscaleModeDesc: 'Alle Erkennung und Verarbeitung überspringen, Bild direkt mit Nearest-Neighbor-Interpolation hochskalieren (für Bilder, die bereits Pixel-Art sind)',
     downloadPureEnergyMap: 'Reine Energiekarte herunterladen',
     downloadPureEnergyMapDesc: 'Graustufenbild herunterladen, das nur Energieinformationen enthält, ohne Gitterlinien',
     downloadEnergyMapWithGrid: 'Energiekarte+Gitter herunterladen',
@@ -135,9 +139,9 @@ export default {
     notLoaded: 'WASM-Modul nicht geladen',
     preload: 'WASM-Modul vorladen',
     performanceInfo: 'WASM-Beschleunigung verbessert die Leistung für:',
-    performanceConvolution: 'Große Bild-Faltung (2-5x schneller)',
-    performanceSobel: 'Kantenerkennung (2-3x schneller)',
-    performanceSampling: 'Pixel-Abtastung (1.5-2x schneller)'
+    performanceConvolution: 'Große Bild-Faltung (1.5-3x schneller)',
+    performanceSobel: 'Kantenerkennung (1.5-2x schneller)',
+    performanceSampling: 'Pixel-Abtastung (1.2-1.5x schneller)'
   },
 
   // Home page

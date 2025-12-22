@@ -133,7 +133,9 @@ export default {
     minPixelSize: '最小画素寸法',
     minPixelSizeDesc: '自動検出時に許容する最小の画素寸法です。',
     maxPixelSize: '最大画素寸法',
-    maxPixelSizeDesc: '自動検出時に許容する最大の画素寸法です。'
+    maxPixelSizeDesc: '自動検出時に許容する最大の画素寸法です。',
+    preprocessInterp: '前処理補間',
+    preprocessInterpDesc: '処理前に画像を補間して拡大し、格子検出の精度を向上させます。最近傍補間を使用して画素境界を鮮明に保ちます。'
   },
 
   // サンプリングモード
@@ -173,7 +175,10 @@ export default {
       '現在の参数に基づいて画像を処理し、画素芸術を生成します。',
     showEnergyMapAndGrid: 'エネルギー地図＋格子線を表示',
     showEnergyMapAndGridDesc:
-      '結果領域にエネルギー地図と検出した格子線を表示します。調試や検出効果の確認に使用します。',
+      '結果領域にエネルギー地図と検出した格子線を表示します。調试や検出効果の確認に使用します。',
+    pureUpscaleMode: '純粋拡大モード',
+    pureUpscaleModeDesc:
+      '全テノ検出ト処理ヲ飛バシ、最近傍補間ヲ用イテ直接画像ヲ拡大シマス（既ニ画素芸術デアル画像向ケ）',
     downloadPureEnergyMap: '純粋エネルギー地図をダウンロード',
     downloadPureEnergyMapDesc:
       '格子線を含まない、エネルギー情報のみの灰階画像をダウンロードします。',
@@ -215,9 +220,9 @@ export default {
     notLoaded: 'WASM モジュールガ読込マレテイマセン',
     preload: 'WASM モジュールヲ先読込',
     performanceInfo: 'WASM 加速ハ以下ノ操作ノ性能ヲ向上シマス：',
-    performanceConvolution: '大画像ノ畳込演算（2-5倍ノ速度）',
-    performanceSobel: '輪郭検出（2-3倍ノ速度）',
-    performanceSampling: '画素サンプリング（1.5-2倍ノ速度）'
+    performanceConvolution: '大画像ノ畳込演算（1.5-3倍ノ速度）',
+    performanceSobel: '輪郭検出（1.5-2倍ノ速度）',
+    performanceSampling: '画素サンプリング（1.2-1.5倍ノ速度）'
   },
 
   // 言語切り替え

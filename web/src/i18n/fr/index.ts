@@ -121,7 +121,9 @@ export default {
     minPixelSize: 'Taille de pixel minimum',
     minPixelSizeDesc: 'Taille de pixel minimale autorisée lors de la détection automatique',
     maxPixelSize: 'Taille de pixel maximum',
-    maxPixelSizeDesc: 'Taille de pixel maximale autorisée lors de la détection automatique'
+    maxPixelSizeDesc: 'Taille de pixel maximale autorisée lors de la détection automatique',
+    preprocessInterp: 'Interpolation de prétraitement',
+    preprocessInterpDesc: 'Interpole et met à l\'échelle l\'image avant le traitement pour améliorer la détection de grille. Utilise l\'interpolation du plus proche voisin pour garder les bords des pixels nets.'
   },
 
   // Mode d'échantillonnage
@@ -153,6 +155,8 @@ export default {
     startProcessingDesc: 'Traiter l\'image selon les paramètres actuels pour générer du pixel art',
     showEnergyMapAndGrid: 'Afficher la carte d\'énergie et la grille',
     showEnergyMapAndGridDesc: 'Afficher la carte d\'énergie et les lignes de grille détectées dans la zone de résultats, utilisé pour le débogage et la vérification des effets de détection',
+    pureUpscaleMode: 'Mode de mise à l\'échelle pure',
+    pureUpscaleModeDesc: 'Ignorer toute la détection et le traitement, mettre directement à l\'échelle l\'image en utilisant l\'interpolation du plus proche voisin (pour les images qui sont déjà du pixel art)',
     downloadPureEnergyMap: 'Télécharger la carte d\'énergie pure',
     downloadPureEnergyMapDesc: 'Télécharger une image en niveaux de gris contenant uniquement les informations d\'énergie sans les lignes de grille',
     downloadEnergyMapWithGrid: 'Télécharger énergie+grille',
@@ -191,9 +195,9 @@ export default {
     notLoaded: 'Module WASM non chargé',
     preload: 'Précharger le module WASM',
     performanceInfo: 'L\'accélération WASM améliore les performances de:',
-    performanceConvolution: 'Grande convolution d\'image (2-5x plus rapide)',
-    performanceSobel: 'Détection des bords (2-3x plus rapide)',
-    performanceSampling: 'Échantillonnage de pixels (1.5-2x plus rapide)'
+    performanceConvolution: 'Grande convolution d\'image (1.5-3x plus rapide)',
+    performanceSobel: 'Détection des bords (1.5-2x plus rapide)',
+    performanceSampling: 'Échantillonnage de pixels (1.2-1.5x plus rapide)'
   },
 
   // Changement de langue

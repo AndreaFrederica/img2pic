@@ -121,7 +121,9 @@ export default {
     minPixelSize: '最小像素大小',
     minPixelSizeDesc: '自动检测时允许的最小像素大小',
     maxPixelSize: '最大像素大小',
-    maxPixelSizeDesc: '自动检测时允许的最大像素大小'
+    maxPixelSizeDesc: '自动检测时允许的最大像素大小',
+    preprocessInterp: '预处理插值',
+    preprocessInterpDesc: '在处理前先对图片进行插值放大，可以提高网格识别效果。使用最近邻插值保持像素边缘清晰。'
   },
 
   // 采样模式
@@ -153,6 +155,8 @@ export default {
     startProcessingDesc: '开始处理图片，根据当前参数生成像素画',
     showEnergyMapAndGrid: '显示能量图和网格线',
     showEnergyMapAndGridDesc: '在结果区域显示能量图和检测到的网格线，用于调试和查看检测效果',
+    pureUpscaleMode: '纯比例放大模式',
+    pureUpscaleModeDesc: '跳过所有检测和处理，直接用最近邻插值放大图片（适用于已经是像素画的图片）',
     downloadPureEnergyMap: '下载纯能量图',
     downloadPureEnergyMapDesc: '下载只包含能量信息的灰度图，不包含网格线',
     downloadEnergyMapWithGrid: '下载能量图+网格',
@@ -191,9 +195,9 @@ export default {
     notLoaded: 'WASM 模块未加载，点击下方按钮预加载',
     preload: '预加载 WASM 模块',
     performanceInfo: 'WASM 加速可提升以下操作的性能：',
-    performanceConvolution: '大图像卷积运算（2-5倍速度）',
-    performanceSobel: '边缘检测（2-3倍速度）',
-    performanceSampling: '像素采样（1.5-2倍速度）'
+    performanceConvolution: '大图像卷积运算（1.5-3倍速度）',
+    performanceSobel: '边缘检测（1.5-2倍速度）',
+    performanceSampling: '像素采样（1.2-1.5倍速度）'
   },
 
   // 语言切换

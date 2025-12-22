@@ -20,8 +20,36 @@
               </template>
             </q-file>
 
-            <!-- 像素化参数 -->
+            <!-- 预处理插值 -->
+            <div class="q-mb-md">
+              <div class="text-body2 q-mb-sm">
+                {{ $t('pixelParams.preprocessInterp') }}: {{ preprocessInterpFactor }}x
+                <q-icon name="help" size="xs" color="primary" class="cursor-pointer">
+                  <q-tooltip>{{ $t('pixelParams.preprocessInterpDesc') }}</q-tooltip>
+                </q-icon>
+              </div>
+              <q-slider
+                v-model="preprocessInterpFactor"
+                :min="1"
+                :max="10"
+                :step="0.5"
+              />
+            </div>
+
+            <!-- 快速处理按钮 -->
+            <q-btn
+              color="primary"
+              :label="$t('actions.startProcessing')"
+              @click="processImage"
+              :loading="processing"
+              :disable="!selectedFile || processing"
+              class="full-width q-mb-md"
+              size="lg"
+            />
+
+            <!-- 像素化参数 (纯比例放大模式下隐藏) -->
             <q-expansion-item
+              v-if="!pureUpscaleMode"
               :label="$t('pixelParams.title')"
               default-opened
               class="q-mb-md"
@@ -358,16 +386,6 @@
             <!-- WASM 加速设置 -->
             <WasmSettings />
 
-            <!-- 处理按钮 -->
-            <q-btn
-              color="primary"
-              :label="$t('actions.startProcessing')"
-              @click="processImage"
-              :loading="processing"
-              :disable="!selectedFile || processing"
-              class="full-width q-mb-md"
-            />
-
             <!-- 显示调试信息 -->
             <q-toggle
               v-model="showDebug"
@@ -382,6 +400,36 @@
                 </span>
               </template>
             </q-toggle>
+
+            <!-- 纯比例放大模式 -->
+            <q-toggle
+              v-model="pureUpscaleMode"
+              class="q-mb-md"
+            >
+              <template v-slot:default>
+                <span class="flex items-center">
+                  {{ $t('actions.pureUpscaleMode') }}
+                  <q-icon name="help" size="xs" color="primary" class="cursor-pointer q-ml-xs">
+                    <q-tooltip>{{ $t('actions.pureUpscaleModeDesc') }}</q-tooltip>
+                  </q-icon>
+                </span>
+              </template>
+            </q-toggle>
+
+            <!-- 纯比例放大倍数 -->
+            <div v-if="pureUpscaleMode" class="q-mb-md">
+              <div class="text-body2 q-mb-sm">
+                {{ $t('samplingMode.upscaleFactor') }}: {{ pureUpscaleFactor }}x
+              </div>
+              <q-slider
+                v-model="pureUpscaleFactor"
+                :min="1"
+                :max="20"
+                :step="1"
+                label
+                label-always
+              />
+            </div>
 
             <!-- 状态信息 -->
             <div v-if="result" class="text-body2 text-grey-7">
@@ -570,6 +618,13 @@ const renderTimings = ref<{
 
 // 直接采样模式开关
 const useDirectSampling = ref(false);
+
+// 预处理插值倍数
+const preprocessInterpFactor = ref(1);
+
+// 纯比例放大模式
+const pureUpscaleMode = ref(false);
+const pureUpscaleFactor = ref(4);
 
 // 能量算法参数
 const params = reactive<PipelineParams>({
@@ -788,14 +843,62 @@ async function processImage() {
   const totalStartTime = performance.now();
 
   try {
+    // 纯比例放大模式 - 直接放大，不做任何处理
+    if (pureUpscaleMode.value) {
+      console.log('[Pure Upscale Mode] Running pure upscale with factor:', pureUpscaleFactor.value);
+      await runPureUpscale();
+      const totalElapsed = performance.now() - totalStartTime;
+      renderTimings.value.total = totalElapsed;
+      renderTimings.value.pixelArt = totalElapsed;
+      console.log(`纯比例放大完成，用时: ${totalElapsed.toFixed(2)}ms`);
+      $q.notify({
+        type: 'positive',
+        message: t('status.processingComplete'),
+      });
+      return;
+    }
+
     // 获取图片数据
     const ctx = originalCanvas.value.getContext('2d')!;
-    const imageData = ctx.getImageData(0, 0, originalCanvas.value.width, originalCanvas.value.height);
+    let imageData = ctx.getImageData(0, 0, originalCanvas.value.width, originalCanvas.value.height);
+
+    // 预处理插值放大（仅在倍数>1时执行）
+    if (preprocessInterpFactor.value > 1) {
+      const factor = preprocessInterpFactor.value;
+      const srcWidth = originalCanvas.value.width;
+      const srcHeight = originalCanvas.value.height;
+      const dstWidth = Math.floor(srcWidth * factor);
+      const dstHeight = Math.floor(srcHeight * factor);
+
+      console.log(`[预处理插值] ${srcWidth}x${srcHeight} -> ${dstWidth}x${dstHeight} (${factor}x)`);
+
+      // 创建放大后的图像数据（使用最近邻插值）
+      const dstImageData = new ImageData(dstWidth, dstHeight);
+      const srcData = imageData.data;
+      const dstData = dstImageData.data;
+
+      for (let dy = 0; dy < dstHeight; dy++) {
+        for (let dx = 0; dx < dstWidth; dx++) {
+          // 最近邻插值
+          const sx = Math.floor(dx / factor);
+          const sy = Math.floor(dy / factor);
+          const srcIdx = (sy * srcWidth + sx) * 4;
+          const dstIdx = (dy * dstWidth + dx) * 4;
+
+          dstData[dstIdx] = srcData[srcIdx]!;         // R
+          dstData[dstIdx + 1] = srcData[srcIdx + 1]!; // G
+          dstData[dstIdx + 2] = srcData[srcIdx + 2]!; // B
+          dstData[dstIdx + 3] = srcData[srcIdx + 3]!; // A
+        }
+      }
+
+      imageData = dstImageData;
+    }
 
     // 准备输入数据
     const input = {
-      width: originalCanvas.value.width,
-      height: originalCanvas.value.height,
+      width: imageData.width,
+      height: imageData.height,
       rgba: imageData.data.buffer,
     };
 
@@ -881,6 +984,93 @@ async function processImage() {
   } finally {
     processing.value = false;
   }
+}
+
+// 纯比例放大函数
+async function runPureUpscale() {
+  if (!originalCanvas.value || !pixelCanvas.value) {
+    await nextTick();
+  }
+
+  if (!originalCanvas.value) {
+    throw new Error('Original canvas not available');
+  }
+
+  const srcWidth = originalCanvas.value.width;
+  const srcHeight = originalCanvas.value.height;
+  const factor = pureUpscaleFactor.value;
+
+  const dstWidth = srcWidth * factor;
+  const dstHeight = srcHeight * factor;
+
+  console.log(`纯比例放大: ${srcWidth}x${srcHeight} -> ${dstWidth}x${dstHeight} (${factor}x)`);
+
+  // 获取原始图像数据
+  const srcCtx = originalCanvas.value.getContext('2d')!;
+  const srcImageData = srcCtx.getImageData(0, 0, srcWidth, srcHeight);
+
+  // 创建放大后的图像数据
+  const dstImageData = new ImageData(dstWidth, dstHeight);
+  const srcData = srcImageData.data;
+  const dstData = dstImageData.data;
+
+  // 最近邻插值放大
+  for (let dy = 0; dy < dstHeight; dy++) {
+    for (let dx = 0; dx < dstWidth; dx++) {
+      // 计算源像素位置（向下取整实现最近邻）
+      const sx = Math.floor(dx / factor);
+      const sy = Math.floor(dy / factor);
+
+      // 计算索引
+      const srcIdx = (sy * srcWidth + sx) * 4;
+      const dstIdx = (dy * dstWidth + dx) * 4;
+
+      // 复制像素
+      dstData[dstIdx] = srcData[srcIdx]!;         // R
+      dstData[dstIdx + 1] = srcData[srcIdx + 1]!; // G
+      dstData[dstIdx + 2] = srcData[srcIdx + 2]!; // B
+      dstData[dstIdx + 3] = srcData[srcIdx + 3]!; // A
+    }
+  }
+
+  // 设置像素画结果
+  // 创建 RGB buffer（用于类型系统，保留 alpha 通道在 rgba 中）
+  const rgbData = new Uint8Array(dstWidth * dstHeight * 3);
+  for (let i = 0; i < dstWidth * dstHeight; i++) {
+    rgbData[i * 3] = dstData[i * 4]!;     // R
+    rgbData[i * 3 + 1] = dstData[i * 4 + 1]!; // G
+    rgbData[i * 3 + 2] = dstData[i * 4 + 2]!; // B
+  }
+
+  result.value = {
+    width: dstWidth,
+    height: dstHeight,
+    detectedPixelSize: 1,
+    energyU8: new Uint8Array(dstWidth * dstHeight).buffer,
+    xLines: [],
+    yLines: [],
+    allXLines: [],
+    allYLines: [],
+    pixelArt: {
+      width: dstWidth,
+      height: dstHeight,
+      rgb: rgbData.buffer,
+      rgba: dstData.buffer,
+      upscaleFactor: factor
+    }
+  };
+
+  // 渲染像素画
+  await nextTick();
+  if (pixelCanvas.value) {
+    pixelCanvas.value.width = dstWidth;
+    pixelCanvas.value.height = dstHeight;
+    const ctx = pixelCanvas.value.getContext('2d')!;
+    ctx.putImageData(dstImageData, 0, 0);
+    ctx.imageSmoothingEnabled = false;
+  }
+
+  renderPixelArt();
 }
 
 // 渲染纯能量图（没有网格线和绿点）
