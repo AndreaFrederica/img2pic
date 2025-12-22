@@ -325,7 +325,15 @@
               <q-card-section>
                 <div class="text-h6 q-mb-md">像素化结果</div>
                 <div class="text-center">
-                  <canvas ref="pixelCanvas" style="max-width: 100%; height: auto; cursor: pointer; background: repeating-conic-gradient(45deg, #f0f0f0 25%, transparent 25%, transparent 75%, #f0f0f0 25%); background-color: transparent;" @click="openImagePreview(pixelCanvas, '像素化结果')" />
+                  <q-img
+                    v-if="pixelArtDataUrl"
+                    :src="pixelArtDataUrl"
+                    no-native-menu
+                    fit="contain"
+                    style="max-width: 100%; height: auto; cursor: pointer; background: repeating-conic-gradient(#f0f0f0 0 25%, transparent 0 50%) 0 0 / 20px 20px;"
+                    @click="openImagePreview(null, '像素化结果')"
+                  />
+                  <canvas ref="pixelCanvas" v-show="false" />
                   <div class="q-mt-md">
                     <q-btn
                       color="secondary"
@@ -400,6 +408,7 @@ const pixelCanvas = ref<HTMLCanvasElement | null>(null);
 const processing = ref(false);
 const showDebug = ref(true); // 默认开启调试模式，方便查看能量图和网格线
 const result = ref<PipelineResult | null>(null);
+const pixelArtDataUrl = ref<string>('');
 let workerInstance: ReturnType<typeof createPixelWorker> | null = null;
 
 // 图片预览器状态
@@ -722,49 +731,15 @@ function renderDebugImage() {
 
 // 渲染像素画
 function renderPixelArt() {
-  if (!result.value?.pixelArt || !pixelCanvas.value) return;
+  if (!result.value?.pixelArt) return;
 
   const { width, height, rgb, rgba } = result.value.pixelArt;
 
-  pixelCanvas.value.width = width;
-  pixelCanvas.value.height = height;
-
-  const ctx = pixelCanvas.value.getContext('2d')!;
-
-  // 创建图像数据
-  const imageData = ctx.createImageData(width, height);
-
-  if (rgba) {
-    // 如果有RGBA数据，使用透明度
-    const rgbaData = new Uint8Array(rgba);
-    for (let i = 0; i < width * height; i++) {
-      const idx = i * 4;
-      imageData.data[idx] = rgbaData[idx] || 0;         // R
-      imageData.data[idx + 1] = rgbaData[idx + 1] || 0; // G
-      imageData.data[idx + 2] = rgbaData[idx + 2] || 0; // B
-      imageData.data[idx + 3] = rgbaData[idx + 3] || 255; // A
-    }
-  } else {
-    // 否则使用RGB数据，默认不透明
-    const rgbData = new Uint8Array(rgb);
-    for (let i = 0; i < width * height; i++) {
-      const idx = i * 4;
-      const rgbIdx = i * 3;
-      imageData.data[idx] = rgbData[rgbIdx] || 0;         // R
-      imageData.data[idx + 1] = rgbData[rgbIdx + 1] || 0; // G
-      imageData.data[idx + 2] = rgbData[rgbIdx + 2] || 0; // B
-      imageData.data[idx + 3] = 255;                  // A
-    }
-  }
-
-  ctx.putImageData(imageData, 0, 0);
-
-  // 如果是像素画，禁用图像平滑以获得清晰的像素效果
-  ctx.imageSmoothingEnabled = false;
-
-  // 调试：检查透明度数据
+  // 如果有 RGBA 数据，直接生成 data URL
   if (rgba) {
     const rgbaData = new Uint8Array(rgba);
+
+    // 调试：检查透明度数据
     let transparentPixels = 0;
     let totalPixels = 0;
     for (let i = 0; i < rgbaData.length; i += 4) {
@@ -773,6 +748,56 @@ function renderPixelArt() {
       if (alpha !== undefined && alpha < 128) transparentPixels++;
     }
     console.log(`像素画渲染调试: 总像素=${totalPixels}, 透明像素=${transparentPixels}, 透明比例=${(transparentPixels/totalPixels*100).toFixed(1)}%`);
+
+    // 直接从 RGBA 数据生成 PNG data URL
+    pixelArtDataUrl.value = createPngDataUrl(width, height, rgbaData);
+  } else if (rgb) {
+    // 如果只有 RGB 数据，转换为 RGBA
+    const rgbData = new Uint8Array(rgb);
+    const rgbaData = new Uint8Array(width * height * 4);
+
+    for (let i = 0; i < width * height; i++) {
+      const rgbIdx = i * 3;
+      const rgbaIdx = i * 4;
+      rgbaData[rgbaIdx] = rgbData[rgbIdx] || 0;         // R
+      rgbaData[rgbaIdx + 1] = rgbData[rgbIdx + 1] || 0; // G
+      rgbaData[rgbaIdx + 2] = rgbData[rgbIdx + 2] || 0; // B
+      rgbaData[rgbaIdx + 3] = 255;                      // A
+    }
+
+    pixelArtDataUrl.value = createPngDataUrl(width, height, rgbaData);
+  }
+
+  // 同时渲染到隐藏的 canvas 用于回退
+  if (pixelCanvas.value) {
+    pixelCanvas.value.width = width;
+    pixelCanvas.value.height = height;
+    const ctx = pixelCanvas.value.getContext('2d')!;
+    const imageData = ctx.createImageData(width, height);
+
+    if (rgba) {
+      const rgbaData = new Uint8Array(rgba);
+      for (let i = 0; i < width * height; i++) {
+        const idx = i * 4;
+        imageData.data[idx] = rgbaData[idx] || 0;
+        imageData.data[idx + 1] = rgbaData[idx + 1] || 0;
+        imageData.data[idx + 2] = rgbaData[idx + 2] || 0;
+        imageData.data[idx + 3] = rgbaData[idx + 3] || 255;
+      }
+    } else if (rgb) {
+      const rgbData = new Uint8Array(rgb);
+      for (let i = 0; i < width * height; i++) {
+        const idx = i * 4;
+        const rgbIdx = i * 3;
+        imageData.data[idx] = rgbData[rgbIdx] || 0;
+        imageData.data[idx + 1] = rgbData[rgbIdx + 1] || 0;
+        imageData.data[idx + 2] = rgbData[rgbIdx + 2] || 0;
+        imageData.data[idx + 3] = 255;
+      }
+    }
+
+    ctx.putImageData(imageData, 0, 0);
+    ctx.imageSmoothingEnabled = false;
   }
 }
 
@@ -900,7 +925,8 @@ function downloadPixelArt() {
     }
 
     // 使用 upng-js 编码 PNG
-    const pngData = UPNG.encode([rgbaData as ArrayBuffer], width, height, 0, 6);
+    const arrayBuffer = rgbaData.buffer.slice(rgbaData.byteOffset, rgbaData.byteOffset + rgbaData.byteLength);
+    const pngData = UPNG.encode([arrayBuffer], width, height, 0);
 
     // 创建 Blob 并下载
     const blob = new Blob([pngData as BlobPart], { type: 'image/png' });
@@ -928,7 +954,7 @@ function createPngDataUrl(width: number, height: number, rgbaData: Uint8Array): 
   }
 
   // 使用正确的 upng-js 编码方式：传入 ArrayBuffer
-  const arrayBuffer = correctedData.buffer.slice(correctedData.byteOffset, correctedData.byteOffset + correctedData.byteLength) as ArrayBuffer;
+  const arrayBuffer = correctedData.buffer.slice(correctedData.byteOffset, correctedData.byteOffset + correctedData.byteLength);
   const pngData = UPNG.encode([arrayBuffer], width, height, 0);
   const blob = new Blob([pngData as BlobPart], { type: 'image/png' });
   return URL.createObjectURL(blob);
@@ -936,16 +962,12 @@ function createPngDataUrl(width: number, height: number, rgbaData: Uint8Array): 
 
 // 打开图片预览器
 function openImagePreview(canvas: HTMLCanvasElement | null, imageName: string) {
-  if (!canvas) return;
-
-  // 如果是像素画预览，并且有 RGBA 数据，直接从原始数据生成
-  if (imageName === '像素化结果' && result.value?.pixelArt?.rgba) {
-    const { width, height, rgba } = result.value.pixelArt;
-    const rgbaData = new Uint8Array(rgba);
+  // 如果是像素画预览，使用已生成的 data URL
+  if (imageName === '像素化结果' && pixelArtDataUrl.value) {
     previewImageName.value = imageName;
-    previewImageSrc.value = createPngDataUrl(width, height, rgbaData);
+    previewImageSrc.value = pixelArtDataUrl.value;
     imagePreviewDialog.value = true;
-  } else {
+  } else if (canvas) {
     // 其他情况使用 canvas
     previewImageName.value = imageName;
     previewImageSrc.value = canvas.toDataURL();
