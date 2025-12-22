@@ -19,7 +19,6 @@ routes = [
 # Assets configuration for serving static files
 [site]
 bucket = "./dist/spa"
-entry-point = "workers-site"
 
 # Environment variables
 [vars]
