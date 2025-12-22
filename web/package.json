@@ -12,14 +12,16 @@
     "test": "echo \"No test specified\" && exit 0",
     "dev": "quasar dev",
     "dev:pwa": "cross-env DEV_PWA=true quasar dev -m pwa",
-    "build": "quasar build -m pwa",
-    "build:pwa": "quasar build -m pwa",
-    "build:spa": "quasar build -m spa",
-    "build:cf": "quasar build -m pwa",
+    "build": "npm run build:wasm && quasar build -m pwa",
+    "build:pwa": "npm run build:wasm && quasar build -m pwa",
+    "build:spa": "npm run build:wasm && quasar build -m spa",
+    "build:cf": "npm run build:wasm && quasar build -m pwa",
+    "build:wasm": "node scripts/build-wasm.js",
     "deploy:cf": "npm run build:cf && cd workers-site && npm install && npm run deploy:production",
     "deploy:cf:staging": "npm run build:cf && cd workers-site && npm install && npm run deploy:staging",
     "generate-icons": "node scripts/generate-icons.js",
-    "postinstall": "quasar prepare"
+    "postinstall": "npm run build:wasm:optional && quasar prepare",
+    "build:wasm:optional": "node scripts/build-wasm.js --optional"
   },
   "dependencies": {
     "@quasar/extras": "^1.16.4",

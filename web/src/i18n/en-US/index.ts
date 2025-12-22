@@ -122,6 +122,23 @@ export default {
     info: 'Info'
   },
 
+  // WASM Acceleration
+  wasm: {
+    title: 'WASM Acceleration',
+    enableWasm: 'Enable WASM Acceleration',
+    enableWasmDesc: 'Use WebAssembly for faster image processing',
+    notSupported: 'WebAssembly is not supported in your browser',
+    loading: 'Loading WASM module...',
+    loaded: 'WASM module loaded successfully!',
+    error: 'Failed to load WASM module',
+    notLoaded: 'WASM module not loaded, click the button below to preload',
+    preload: 'Preload WASM Module',
+    performanceInfo: 'WASM acceleration improves performance for:',
+    performanceConvolution: 'Large image convolution (2-5x faster)',
+    performanceSobel: 'Edge detection (2-3x faster)',
+    performanceSampling: 'Pixel sampling (1.5-2x faster)'
+  },
+
   // Home page
   home: {
     subtitle: 'Convert AI-generated pseudo pixel art into real pixel art',

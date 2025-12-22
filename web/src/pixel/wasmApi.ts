@@ -131,7 +131,10 @@ export async function loadWasmModule(): Promise<WasmModule> {
   wasmLoadPromise = (async () => {
     try {
       // 动态导入 WASM 模块
+      // 注意：WASM 文件需要先通过 wasm-pack 构建
       const wasmUrl = new URL('/wasm/index_bg.wasm', import.meta.url);
+
+      // @ts-expect-error - WASM 模块由 wasm-pack 生成，构建后才存在
       const { default: init } = await import('/wasm/index.js');
       const module = await init(wasmUrl.toString());
 

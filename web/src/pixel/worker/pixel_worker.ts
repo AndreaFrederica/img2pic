@@ -1,9 +1,52 @@
 import * as Comlink from "comlink";
 import type { PipelineParams, PipelineResult, RgbaImage } from "../types";
-import { rgbaToGray01, gradEnergy, enhanceEnergyDirectional, toHeatmapU8 } from "../energy";
-import { detectPixelSize, detectGridLines, interpolateLines, completeEdges, samplePixelArt, samplePixelArtDirect } from "../grid";
 
-function runPipeline(img: RgbaImage, params: PipelineParams): PipelineResult {
+// 优先使用 WASM 加速版本，回退到 JavaScript 版本
+import {
+  rgbaToGray01 as rgbaToGray01Wasm,
+  gradEnergy as gradEnergyWasm,
+  enhanceEnergyDirectional as enhanceEnergyDirectionalWasm,
+  toHeatmapU8 as toHeatmapU8Wasm,
+  detectPixelSize as detectPixelSizeWasm,
+  detectGridLines as detectGridLinesWasm,
+  interpolateLines as interpolateLinesWasm,
+  completeEdges as completeEdgesWasm,
+  samplePixelArt as samplePixelArtWasm,
+  samplePixelArtDirect as samplePixelArtDirectWasm,
+} from "../wasmCompat";
+
+// JavaScript 回退实现
+import {
+  rgbaToGray01 as rgbaToGray01Js,
+  gradEnergy as gradEnergyJs,
+  enhanceEnergyDirectional as enhanceEnergyDirectionalJs,
+  toHeatmapU8 as toHeatmapU8Js,
+} from "../energy";
+import {
+  detectPixelSize as detectPixelSizeJs,
+  detectGridLines as detectGridLinesJs,
+  interpolateLines as interpolateLinesJs,
+  completeEdges as completeEdgesJs,
+  samplePixelArt as samplePixelArtJs,
+  samplePixelArtDirect as samplePixelArtDirectJs,
+} from "../grid";
+
+// 检查 WASM 是否可用并选择合适的实现
+// 如果 WASM 模块未启用或加载失败，自动回退到 JavaScript
+async function withWasmFallback<T>(
+  wasmFn: () => Promise<T>,
+  jsFn: () => T | Promise<T>
+): Promise<T> {
+  try {
+    const result = await wasmFn();
+    return result;
+  } catch {
+    // WASM 不可用，使用 JavaScript 版本
+    return jsFn();
+  }
+}
+
+async function runPipeline(img: RgbaImage, params: PipelineParams): Promise<PipelineResult> {
   console.log('Worker: runPipeline started', { width: img.width, height: img.height, params });
 
   const width = img.width;
@@ -24,45 +67,78 @@ function runPipeline(img: RgbaImage, params: PipelineParams): PipelineResult {
     energyU8 = new Uint8Array(width * height);
   } else {
     // 原有的基于能量图的流程
-    // 1) energy
-    const gray = rgbaToGray01(rgba, width, height);
-    let energy = gradEnergy(gray, width, height, params.sigma);
+    // 1) energy - 使用 WASM 或 JS 实现
+    const gray = await withWasmFallback(
+      () => rgbaToGray01Wasm(rgba, width, height),
+      () => rgbaToGray01Js(rgba, width, height)
+    );
+
+    let energy = await withWasmFallback(
+      () => gradEnergyWasm(gray, width, height, params.sigma),
+      () => gradEnergyJs(gray, width, height, params.sigma)
+    );
 
     if (params.enhanceEnergy) {
-      if (params.enhanceDirectional) {
-        energy = enhanceEnergyDirectional(energy, width, height, params.enhanceHorizontal, params.enhanceVertical);
-      } else {
-        energy = enhanceEnergyDirectional(energy, width, height, 1.5, 1.5);
-      }
+      const hFactor = params.enhanceDirectional ? params.enhanceHorizontal : 1.5;
+      const vFactor = params.enhanceDirectional ? params.enhanceVertical : 1.5;
+
+      energy = await withWasmFallback(
+        () => enhanceEnergyDirectionalWasm(energy, width, height, hFactor, vFactor),
+        () => enhanceEnergyDirectionalJs(energy, width, height, hFactor, vFactor)
+      );
     }
 
-    energyU8 = toHeatmapU8(energy);
+    energyU8 = await withWasmFallback(
+      () => toHeatmapU8Wasm(energy),
+      () => toHeatmapU8Js(energy)
+    );
 
     // 2) pixel size detect (if needed)
     pixelSize = params.pixelSize || 0;
     if (pixelSize <= 0) {
-      pixelSize = detectPixelSize(energyU8, width, height, params.minS, params.maxS);
+      pixelSize = await withWasmFallback(
+        () => detectPixelSizeWasm(energyU8, width, height, params.minS, params.maxS),
+        () => detectPixelSizeJs(energyU8, width, height, params.minS, params.maxS)
+      );
     }
     console.log('Worker: detected pixelSize:', pixelSize);
 
     // 3) grid detect
-    const gridResult = detectGridLines(
-      energyU8,
-      width,
-      height,
-      pixelSize,
-      params.gapTolerance,
-      params.minEnergy,
-      params.smooth,
-      params.windowSize
+    const gridResult = await withWasmFallback(
+      () => detectGridLinesWasm(
+        energyU8,
+        width,
+        height,
+        pixelSize,
+        params.gapTolerance,
+        params.minEnergy,
+        params.smooth,
+        params.windowSize
+      ),
+      () => detectGridLinesJs(
+        energyU8,
+        width,
+        height,
+        pixelSize,
+        params.gapTolerance,
+        params.minEnergy,
+        params.smooth,
+        params.windowSize
+      )
     );
     xLines = gridResult.xLines;
     yLines = gridResult.yLines;
     console.log('Worker: grid lines detected', { xLines: xLines.length, yLines: yLines.length });
 
     // 4) interpolate + complete edges
-    const allX0 = interpolateLines(xLines, width, pixelSize);
-    const allY0 = interpolateLines(yLines, height, pixelSize);
+    const allX0 = await withWasmFallback(
+      () => interpolateLinesWasm(xLines, width, pixelSize),
+      () => interpolateLinesJs(xLines, width, pixelSize)
+    );
+    const allY0 = await withWasmFallback(
+      () => interpolateLinesWasm(yLines, height, pixelSize),
+      () => interpolateLinesJs(yLines, height, pixelSize)
+    );
 
     // Calculate typical gaps
     let typicalX = pixelSize;
@@ -87,8 +163,14 @@ function runPipeline(img: RgbaImage, params: PipelineParams): PipelineResult {
       typicalY = Math.round(sum / (allY0.length - 1));
     }
 
-    allX = completeEdges(allX0, width, typicalX, params.gapTolerance);
-    allY = completeEdges(allY0, height, typicalY, params.gapTolerance);
+    allX = await withWasmFallback(
+      () => completeEdgesWasm(allX0, width, typicalX, params.gapTolerance),
+      () => completeEdgesJs(allX0, width, typicalX, params.gapTolerance)
+    );
+    allY = await withWasmFallback(
+      () => completeEdgesWasm(allY0, height, typicalY, params.gapTolerance),
+      () => completeEdgesJs(allY0, height, typicalY, params.gapTolerance)
+    );
   }
 
   // 5) pixel art (optional)
@@ -109,16 +191,29 @@ function runPipeline(img: RgbaImage, params: PipelineParams): PipelineResult {
 
       console.log('Worker: direct sampling', { pixelSize, targetWidth, targetHeight });
 
-      const { outW, outH, outRgb, outRgba } = samplePixelArtDirect(
-        rgba,
-        width,
-        height,
-        targetWidth,
-        targetHeight,
-        params.sampleMode,
-        params.sampleWeightRatio,
-        upscaleFactor,
-        nativeRes
+      const { outW, outH, outRgb, outRgba } = await withWasmFallback(
+        () => samplePixelArtDirectWasm(
+          rgba,
+          width,
+          height,
+          targetWidth,
+          targetHeight,
+          params.sampleMode,
+          params.sampleWeightRatio,
+          upscaleFactor,
+          nativeRes
+        ),
+        () => samplePixelArtDirectJs(
+          rgba,
+          width,
+          height,
+          targetWidth,
+          targetHeight,
+          params.sampleMode,
+          params.sampleWeightRatio,
+          upscaleFactor,
+          nativeRes
+        )
       );
 
       pixelArt = {
@@ -130,16 +225,29 @@ function runPipeline(img: RgbaImage, params: PipelineParams): PipelineResult {
       };
     } else {
       // 使用基于网格的采样
-      const { outW, outH, outRgb, outRgba } = samplePixelArt(
-        rgba,
-        width,
-        height,
-        allX,
-        allY,
-        params.sampleMode,
-        params.sampleWeightRatio,
-        upscaleFactor,
-        nativeRes
+      const { outW, outH, outRgb, outRgba } = await withWasmFallback(
+        () => samplePixelArtWasm(
+          rgba,
+          width,
+          height,
+          allX,
+          allY,
+          params.sampleMode,
+          params.sampleWeightRatio,
+          upscaleFactor,
+          nativeRes
+        ),
+        () => samplePixelArtJs(
+          rgba,
+          width,
+          height,
+          allX,
+          allY,
+          params.sampleMode,
+          params.sampleWeightRatio,
+          upscaleFactor,
+          nativeRes
+        )
       );
 
       pixelArt = {

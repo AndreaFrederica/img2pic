@@ -12,10 +12,9 @@
           <div class="text-caption text-grey">{{ $t('wasm.enableWasmDesc') }}</div>
         </div>
         <q-toggle
-          v-model="wasmEnabled"
+          v-model="settingsStore.wasmEnabled"
           color="primary"
           :disable="!isSupported"
-          @update:model-value="onToggleWasm"
         />
       </div>
 
@@ -41,11 +40,12 @@
           <q-icon name="download" />
         </template>
         {{ $t('wasm.loading') }}
+        <q-spinner-dots class="float-right" />
       </q-banner>
 
       <!-- 加载成功 -->
       <q-banner
-        v-else-if="wasmEnabled && wasmState === 'loaded'"
+        v-else-if="settingsStore.wasmEnabled && wasmState === 'loaded'"
         class="bg-positive text-white q-mb-md"
         dense
       >
@@ -67,6 +67,18 @@
         {{ $t('wasm.error') }}: {{ wasmError?.message }}
       </q-banner>
 
+      <!-- 未加载提示 -->
+      <q-banner
+        v-else-if="settingsStore.wasmEnabled && wasmState === 'unloaded'"
+        class="bg-grey-8 text-white q-mb-md"
+        dense
+      >
+        <template v-slot:avatar>
+          <q-icon name="info" />
+        </template>
+        {{ $t('wasm.notLoaded') }}
+      </q-banner>
+
       <!-- 性能提示 -->
       <q-separator class="q-my-md" />
 
@@ -86,7 +98,7 @@
         color="secondary"
         outline
         class="q-mt-md"
-        :loading="wasmState === 'loading'"
+        :loading="wasmState === 'loading' || wasmState === 'unloaded'"
         @click="onPreloadWasm"
       />
     </q-card>
@@ -94,38 +106,38 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
-import { useI18n } from 'vue-i18n';
+import { ref, onMounted, onUnmounted } from 'vue';
+import { useSettingsStore } from '../stores/settings';
 import {
-  setWasmEnabled,
-  isWasmEnabled,
   isWasmSupported,
   getWasmState,
   getWasmError,
   preloadWasm
 } from '../pixel/wasmApi';
 
-const { t } = useI18n();
+const settingsStore = useSettingsStore();
 
 // 状态
-const wasmEnabled = ref(false);
 const isSupported = ref(false);
 const wasmState = ref<'unloaded' | 'loading' | 'loaded' | 'error'>('unloaded');
 const wasmError = ref<Error | null>(null);
+let updateInterval: ReturnType<typeof setInterval> | null = null;
 
 // 初始化
 onMounted(() => {
   isSupported.value = isWasmSupported();
-  wasmEnabled.value = isWasmEnabled();
   updateState();
 
   // 每秒更新状态
-  const interval = setInterval(() => {
+  updateInterval = setInterval(() => {
     updateState();
-  }, 1000);
+  }, 500);
+});
 
-  // 清理
-  return () => clearInterval(interval);
+onUnmounted(() => {
+  if (updateInterval) {
+    clearInterval(updateInterval);
+  }
 });
 
 function updateState() {
@@ -133,54 +145,8 @@ function updateState() {
   wasmError.value = getWasmError();
 }
 
-async function onToggleWasm(value: boolean) {
-  setWasmEnabled(value);
-  if (value && isSupported.value) {
-    // 启用 WASM 时自动加载
-    await preloadWasm();
-    updateState();
-  }
-}
-
 async function onPreloadWasm() {
   await preloadWasm();
   updateState();
 }
 </script>
-
-<i18n>
-{
-  "en-US": {
-    "wasm": {
-      "title": "WASM Acceleration",
-      "enableWasm": "Enable WASM Acceleration",
-      "enableWasmDesc": "Use WebAssembly for faster image processing",
-      "notSupported": "WebAssembly is not supported in your browser",
-      "loading": "Loading WASM module...",
-      "loaded": "WASM module loaded successfully!",
-      "error": "Failed to load WASM module",
-      "preload": "Preload WASM Module",
-      "performanceInfo": "WASM acceleration improves performance for:",
-      "performanceConvolution": "Large image convolution (2-5x faster)",
-      "performanceSobel": "Edge detection (2-3x faster)",
-      "performanceSampling": "Pixel sampling (1.5-2x faster)"
-    }
-  },
-  "zh-CN": {
-    "wasm": {
-      "title": "WASM 加速",
-      "enableWasm": "启用 WASM 加速",
-      "enableWasmDesc": "使用 WebAssembly 加速图像处理",
-      "notSupported": "您的浏览器不支持 WebAssembly",
-      "loading": "正在加载 WASM 模块...",
-      "loaded": "WASM 模块加载成功！",
-      "error": "WASM 模块加载失败",
-      "preload": "预加载 WASM 模块",
-      "performanceInfo": "WASM 加速可提升以下操作的性能：",
-      "performanceConvolution": "大图像卷积运算（2-5倍速度）",
-      "performanceSobel": "边缘检测（2-3倍速度）",
-      "performanceSampling": "像素采样（1.5-2倍速度）"
-    }
-  }
-}
-</i18n>

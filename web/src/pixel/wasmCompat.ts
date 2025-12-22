@@ -6,7 +6,7 @@
 import * as jsImpl from "./filters";
 import * as jsEnergy from "./energy";
 import * as jsGrid from "./grid";
-import { getWasmModule, ensureWasmLoaded, sampleModeToWasm } from "./wasmApi";
+import { ensureWasmLoaded, sampleModeToWasm } from "./wasmApi";
 import type { SampleMode } from "./types";
 
 /**
@@ -191,7 +191,7 @@ export async function samplePixelArtDirect(
   weightRatio: number,
   upscaleFactor: number,
   nativeRes: boolean
-): Promise<{ outW: number; outH: number; outRgb: Uint8Array; outRgba: Uint8Array }> {
+): Promise<{ outW: number; outH: number; outRgb: Uint8Array; outRgba?: Uint8Array }> {
   const wasm = await ensureWasmLoaded();
   if (wasm) {
     const wasmMode = sampleModeToWasm(mode);
@@ -229,7 +229,7 @@ export async function samplePixelArt(
   weightRatio: number,
   upscaleFactor: number,
   nativeRes: boolean
-): Promise<{ outW: number; outH: number; outRgb: Uint8Array; outRgba: Uint8Array }> {
+): Promise<{ outW: number; outH: number; outRgb: Uint8Array; outRgba?: Uint8Array }> {
   const wasm = await ensureWasmLoaded();
   if (wasm) {
     const wasmMode = sampleModeToWasm(mode);

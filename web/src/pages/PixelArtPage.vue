@@ -355,6 +355,9 @@
               </q-card>
             </q-expansion-item>
 
+            <!-- WASM 加速设置 -->
+            <WasmSettings />
+
             <!-- 处理按钮 -->
             <q-btn
               color="primary"
@@ -513,6 +516,7 @@ import UPNG from 'upng-js';
 import { createPixelWorker } from 'src/pixel/workerApi';
 import type { PipelineParams, PipelineResult } from 'src/pixel/types';
 import InlineImageViewer from 'src/components/InlineImageViewer.vue';
+import WasmSettings from 'src/components/WasmSettings.vue';
 import { storageService } from 'src/utils/storage';
 
 const $q = useQuasar();
