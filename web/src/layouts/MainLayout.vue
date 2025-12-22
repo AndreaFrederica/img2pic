@@ -49,7 +49,7 @@ const linksList: EssentialLinkProps[] = [
   },
   {
     title: '小说助手',
-    caption: 'AI 小说创作助手',
+    caption: '让你的VSCode变成小说写作利器',
     icon: 'auto_stories',
     link: 'https://anh.sirrus.cc',
   },

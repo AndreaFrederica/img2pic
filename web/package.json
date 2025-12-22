@@ -12,9 +12,9 @@
     "test": "echo \"No test specified\" && exit 0",
     "dev": "quasar dev",
     "build": "quasar build",
-    "build:cloudflare": "quasar build -m spa",
-    "deploy:cloudflare": "npm run build:cloudflare && cd workers-site && npm install && npm run deploy:production",
-    "deploy:cloudflare:staging": "npm run build:cloudflare && cd workers-site && npm install && npm run deploy:staging",
+    "build:cf": "quasar build -m spa",
+    "deploy:cf": "npm run build:cf && cd workers-site && npm install && npm run deploy:production",
+    "deploy:cf:staging": "npm run build:cf && cd workers-site && npm install && npm run deploy:staging",
     "postinstall": "quasar prepare"
   },
   "dependencies": {

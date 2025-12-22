@@ -5,7 +5,7 @@
 ### 1. 构建项目
 ```bash
 # 构建生产版本
-npm run build:cloudflare
+npm run build:cf
 
 # 或者使用标准构建
 npm run build
@@ -15,18 +15,18 @@ npm run build
 
 #### 生产环境部署
 ```bash
-npm run deploy:cloudflare
+npm run deploy:cf
 ```
 
 #### 测试环境部署
 ```bash
-npm run deploy:cloudflare:staging
+npm run deploy:cf:staging
 ```
 
 ### 3. 手动部署（如果脚本失败）
 ```bash
 # 1. 构建项目
-npm run build:cloudflare
+npm run build:cf
 
 # 2. 进入 workers-site 目录
 cd workers-site
@@ -98,8 +98,8 @@ npm run dev
 ## 更新部署
 
 1. 修改代码
-2. 运行 `npm run build:cloudflare`
-3. 运行 `npm run deploy:cloudflare`
+2. 运行 `npm run build:cf`
+3. 运行 `npm run deploy:cf`
 4. 验证部署结果
 
 ## 监控
