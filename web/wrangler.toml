@@ -4,7 +4,7 @@ main = "workers/worker.js"
 compatibility_date = "2025-11-12"
 workers_dev = false
 
-assets = { directory = "dist/spa", binding = "ASSETS" }
+assets = { directory = "dist/pwa", binding = "ASSETS" }
 
 [[routes]]
 pattern = "i2p.sirrus.cc"

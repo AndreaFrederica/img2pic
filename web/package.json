@@ -12,10 +12,10 @@
     "test": "echo \"No test specified\" && exit 0",
     "dev": "quasar dev",
     "dev:pwa": "cross-env DEV_PWA=true quasar dev -m pwa",
-    "build": "quasar build",
-    "build:pwa": "node scripts/build-pwa.js",
+    "build": "quasar build -m pwa",
+    "build:pwa": "quasar build -m pwa",
     "build:spa": "quasar build -m spa",
-    "build:cf": "quasar build -m spa",
+    "build:cf": "quasar build -m pwa",
     "deploy:cf": "npm run build:cf && cd workers-site && npm install && npm run deploy:production",
     "deploy:cf:staging": "npm run build:cf && cd workers-site && npm install && npm run deploy:staging",
     "postinstall": "quasar prepare"

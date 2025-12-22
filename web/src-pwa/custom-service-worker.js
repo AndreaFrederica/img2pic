@@ -1,101 +1,174 @@
 /* eslint-env serviceworker */
-/* global workbox */
-/*
+/**
  * Custom Service Worker for img2pic PWA
- * This service worker provides offline functionality for the pixel art conversion app
+ * No CDN dependencies - uses native Cache API
+ *
+ * Build process will replace self.__WB_MANIFEST with precache list
  */
 
-// Note: Workbox will inject the precache manifest here
-globalThis.importScripts(
-  'https://storage.googleapis.com/workbox-cdn/releases/6.5.4/workbox-sw.js'
-);
+// ============================================
+// PRECACHE MANIFEST (injected by Quasar build)
+// ============================================
+const precacheList = self.__WB_MANIFEST || [];
 
-workbox.loadModule('workbox-precaching');
-workbox.loadModule('workbox-routing');
-workbox.loadModule('workbox-strategies');
+// ============================================
+// CACHE CONFIGURATION
+// ============================================
+const CACHE_PREFIX = 'img2pic';
+const CACHE_VERSION = 'v1';
+const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${CACHE_VERSION}`;
+const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${CACHE_VERSION}`;
 
-// This line will be replaced with the actual precache manifest
-workbox.precaching.precacheAndRoute(self.__WB_MANIFEST);
+// ============================================
+// INSTALL EVENT
+// ============================================
+self.addEventListener('install', (event) => {
+  self.skipWaiting();
 
-// Cache strategy for different request types
-workbox.routing.registerRoute(
-  ({ request }) => {
-    // Cache static assets
-    return request.destination === 'script' ||
-           request.destination === 'style' ||
-           request.destination === 'font' ||
-           request.url.includes('/icons/') ||
-           request.url.includes('/assets/');
-  },
-  new workbox.strategies.StaleWhileRevalidate({
-    cacheName: 'app-shell-cache',
-    plugins: [
-      new workbox.expiration.ExpirationPlugin({
-        maxEntries: 100,
-        maxAgeSeconds: 7 * 24 * 60 * 60, // 7 days
-      }),
-    ],
-  })
-);
+  // Cache precached assets (injected by build)
+  const precacheUrls = precacheList.map(entry => typeof entry === 'string' ? entry : entry.url);
+  const staticAssets = ['/', '/index.html', '/icons/icon-96x96.png', '/icons/icon-128x128.png'];
 
-// Cache HTML pages with NetworkFirst strategy
-workbox.routing.registerRoute(
-  ({ request }) => request.destination === 'document',
-  new workbox.strategies.NetworkFirst({
-    cacheName: 'html-cache',
-    plugins: [
-      new workbox.expiration.ExpirationPlugin({
-        maxEntries: 10,
-        maxAgeSeconds: 24 * 60 * 60, // 24 hours
-      }),
-    ],
-  })
-);
+  event.waitUntil(
+    caches.open(PRECACHE_NAME).then((cache) => cache.addAll([...precacheUrls, ...staticAssets]))
+  );
+});
 
-// Cache external resources (like Google Fonts, CDN resources)
-workbox.routing.registerRoute(
-  ({ url }) => url.origin !== self.location.origin,
-  new workbox.strategies.CacheFirst({
-    cacheName: 'external-resources',
-    plugins: [
-      new workbox.expiration.ExpirationPlugin({
-        maxEntries: 50,
-        maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
-      }),
-    ],
-  })
-);
+// ============================================
+// ACTIVATE EVENT
+// ============================================
+self.addEventListener('activate', (event) => {
+  event.waitUntil(self.clients.claim());
 
-// Don't cache user uploads - process them directly
-workbox.routing.registerRoute(
-  ({ url }) => {
-    return url.pathname.includes('upload') || url.pathname.includes('temp');
-  },
-  new workbox.strategies.NetworkFirst({
-    cacheName: 'user-uploads',
-    networkTimeoutSeconds: 3,
-    plugins: [
-      new workbox.expiration.ExpirationPlugin({
-        maxEntries: 5,
-        maxAgeSeconds: 60, // Only cache uploads for 1 minute
-      }),
-    ],
-  })
-);
+  // Cleanup old caches
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames
+          .filter((cacheName) => cacheName.startsWith(CACHE_PREFIX) && cacheName !== PRECACHE_NAME && cacheName !== RUNTIME_CACHE)
+          .map((cacheName) => caches.delete(cacheName))
+      );
+    })
+  );
+});
 
-// Handle offline fallback for HTML pages
-workbox.routing.setCatchHandler(({ event }) => {
-  if (event.request.destination === 'document') {
-    return caches.match('/index.html');
+// ============================================
+// FETCH EVENT - Caching Strategies
+// ============================================
+self.addEventListener('fetch', (event) => {
+  const { request } = event;
+  const url = new URL(request.url);
+
+  // Skip dev server files and HMR requests
+  if (url.pathname.includes('/src/') ||
+      url.searchParams.has('t') ||
+      url.pathname.endsWith('.ts') ||
+      url.pathname.endsWith('.vue')) {
+    return;
+  }
+
+  // Skip non-GET requests
+  if (request.method !== 'GET') {
+    return;
+  }
+
+  // Skip cross-origin requests that shouldn't be cached
+  if (url.origin !== self.location.origin && !url.origin.includes('fonts.gstatic.com')) {
+    return;
+  }
+
+  // HTML pages - NetworkFirst for fresh content
+  if (request.destination === 'document') {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          // Clone and cache the response
+          const responseClone = response.clone();
+          caches.open(RUNTIME_CACHE).then((cache) => cache.put(request, responseClone));
+          return response;
+        })
+        .catch(() => caches.match(request).then((cached) => cached || caches.match('/index.html')))
+    );
+    return;
+  }
+
+  // Static assets (js, css, fonts, icons) - CacheFirst (prefer cache, fallback to network)
+  if (request.destination === 'script' ||
+      request.destination === 'style' ||
+      request.destination === 'font' ||
+      url.pathname.includes('/icons/') ||
+      url.pathname.includes('/assets/')) {
+    event.respondWith(
+      caches.match(request).then((cached) => {
+        if (cached) {
+          // Update cache in background
+          fetch(request).then((response) => {
+            if (response && response.status === 200) {
+              caches.open(RUNTIME_CACHE).then((cache) => cache.put(request, response));
+            }
+          });
+          return cached;
+        }
+        return fetch(request).then((response) => {
+          // Cache successful responses
+          if (response && response.status === 200) {
+            const responseClone = response.clone();
+            caches.open(RUNTIME_CACHE).then((cache) => cache.put(request, responseClone));
+          }
+          return response;
+        });
+      })
+    );
+    return;
+  }
+
+  // Images - CacheFirst
+  if (request.destination === 'image') {
+    event.respondWith(
+      caches.match(request).then((cached) => {
+        return cached || fetch(request).then((response) => {
+          if (response && response.status === 200) {
+            const responseClone = response.clone();
+            caches.open(RUNTIME_CACHE).then((cache) => cache.put(request, responseClone));
+          }
+          return response;
+        });
+      })
+    );
+    return;
+  }
+
+  // NetworkFirst for other requests
+  event.respondWith(
+    fetch(request)
+      .then((response) => {
+        if (response && response.status === 200) {
+          const responseClone = response.clone();
+          caches.open(RUNTIME_CACHE).then((cache) => cache.put(request, responseClone));
+        }
+        return response;
+      })
+      .catch(() => caches.match(request))
+  );
+});
+
+// ============================================
+// MESSAGE HANDLER
+// ============================================
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
   }
 });
 
-// Handle push notifications for future features
+// ============================================
+// PUSH NOTIFICATIONS (future feature)
+// ============================================
 self.addEventListener('push', (event) => {
   if (event.data) {
     const options = {
       body: event.data.text(),
-      icon: '/icons/icon-192x192.png',
+      icon: '/icons/icon-128x128.png',
       badge: '/icons/badge-72x72.png',
       vibrate: [100, 50, 100],
       data: {
@@ -110,20 +183,9 @@ self.addEventListener('push', (event) => {
   }
 });
 
-// Handle notification clicks
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-
-  if (event.action === 'explore') {
-    event.waitUntil(
-      globalThis.clients.openWindow('/')
-    );
-  }
-});
-
-// Listen for messages from the main thread
-self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
-    self.skipWaiting();
-  }
+  event.waitUntil(
+    self.clients.openWindow('/')
+  );
 });
