@@ -173,7 +173,7 @@ python edge_detect_pixelize.py --in input.png --debug
 | 网格插值 | ✅ | ❌ |
 | 方向性增强 | ✅ | ❌ |
 | 多种采样模式 | ✅ | ❌ |
-| 颜色量化 | ❌ | ✅ |
+| 颜色量化 | ✅ | ✅ |
 
 ## 适用场景
 
@@ -273,4 +273,4 @@ def _detect_pixel_size(energy, min_s, max_s):
 
 ## 许可证
 
-本项目采用 MIT 许可证。
+本项目采用 MPL2.0 许可证。
