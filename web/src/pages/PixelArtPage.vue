@@ -20,26 +20,30 @@
               </template>
             </q-file>
 
-            <!-- 能量算法参数 -->
+            <!-- 像素化参数 -->
             <q-expansion-item
-              label="能量算法参数"
+              label="像素化参数"
               default-opened
               class="q-mb-md"
             >
               <q-card flat bordered class="q-pa-md">
-                <!-- 基础参数 -->
-                <div class="q-mb-md">
-                  <div class="text-body2 q-mb-sm">高斯模糊 (σ): {{ params.sigma.toFixed(1) }}</div>
-                  <q-slider
-                    v-model="params.sigma"
-                    :min="0"
-                    :max="5"
-                    :step="0.1"
-                    label
-                    label-always
-                    class="q-mb-md"
-                  />
-                </div>
+                <!-- 能量算法参数（仅在非直接采样模式时显示） -->
+                <template v-if="!useDirectSampling">
+                  <div class="text-subtitle2 q-mb-md">能量算法参数</div>
+
+                  <!-- 基础参数 -->
+                  <div class="q-mb-md">
+                    <div class="text-body2 q-mb-sm">高斯模糊 (σ): {{ params.sigma.toFixed(1) }}</div>
+                    <q-slider
+                      v-model="params.sigma"
+                      :min="0"
+                      :max="5"
+                      :step="0.1"
+                      label
+                      label-always
+                      class="q-mb-md"
+                    />
+                  </div>
 
                 <div class="q-mb-md">
                   <div class="text-body2 q-mb-sm">间隙容忍度: {{ params.gapTolerance }}</div>
@@ -120,21 +124,26 @@
                     </div>
                   </template>
                 </template>
+              </template>
 
                 <!-- 像素大小检测 -->
                 <div class="q-mb-md">
-                  <div class="text-body2 q-mb-sm">像素大小: {{ params.pixelSize === 0 ? '自动检测' : params.pixelSize }}</div>
+                  <div class="text-body2 q-mb-sm">
+                    像素大小:
+                    <span v-if="useDirectSampling">{{ params.pixelSize || 8 }}px (手动设置)</span>
+                    <span v-else>{{ params.pixelSize === 0 ? '自动检测' : params.pixelSize + 'px' }}</span>
+                  </div>
                   <q-slider
                     v-model="params.pixelSize"
-                    :min="0"
-                    :max="20"
+                    :min="useDirectSampling ? 1 : 0"
+                    :max="useDirectSampling ? 50 : 20"
                     label
                     label-always
                     class="q-mb-md"
                   />
                 </div>
 
-                <template v-if="params.pixelSize === 0">
+                <template v-if="!useDirectSampling && params.pixelSize === 0">
                   <div class="q-mb-md">
                     <div class="text-body2 q-mb-sm">最小像素大小: {{ params.minS }}</div>
                     <q-slider
@@ -160,7 +169,9 @@
                   </div>
                 </template>
 
-                <!-- 采样参数 -->
+                <!-- 采样模式选择 -->
+                <div class="text-subtitle2 q-mb-md">采样模式</div>
+
                 <q-toggle
                   v-model="params.sample"
                   label="生成像素画"
@@ -168,14 +179,22 @@
                 />
 
                 <template v-if="params.sample">
-                  <q-select
-                    v-model="params.sampleMode"
-                    :options="sampleModeOptions"
-                    label="采样模式"
-                    emit-value
-                    map-options
+                  <q-toggle
+                    v-model="useDirectSampling"
+                    label="直接按比例采样（适用于普通图片）"
                     class="q-mb-md"
                   />
+
+                  <template v-if="!useDirectSampling">
+                    <q-select
+                      v-model="params.sampleMode"
+                      :options="sampleModeOptions.filter(opt => opt.value !== 'direct')"
+                      label="能量图采样模式"
+                      emit-value
+                      map-options
+                      class="q-mb-md"
+                    />
+                  </template>
 
                   <q-toggle
                     v-model="params.nativeRes"
@@ -197,7 +216,7 @@
                     </div>
                   </template>
 
-                  <template v-if="params.sampleMode === 'weighted'">
+                  <template v-if="!useDirectSampling && params.sampleMode === 'weighted'">
                     <div class="q-mb-md">
                       <div class="text-body2 q-mb-sm">加权比例: {{ params.sampleWeightRatio.toFixed(1) }}</div>
                       <q-slider
@@ -210,6 +229,18 @@
                         class="q-mb-md"
                       />
                     </div>
+                  </template>
+
+                  <template v-if="useDirectSampling">
+                    <q-separator class="q-my-md" />
+                    <div class="text-subtitle2 q-mb-md">直接采样参数</div>
+
+                    <q-banner class="bg-grey-2 text-grey-8 q-mb-md">
+                      <template v-slot:avatar>
+                        <q-icon name="info" />
+                      </template>
+                      直接采样模式适用于普通图片转换为像素画。需要手动设置像素大小。
+                    </q-banner>
                   </template>
                 </template>
               </q-card>
@@ -294,7 +325,7 @@
               <q-card-section>
                 <div class="text-h6 q-mb-md">像素化结果</div>
                 <div class="text-center">
-                  <canvas ref="pixelCanvas" style="max-width: 100%; height: auto; cursor: pointer;" @click="openImagePreview(pixelCanvas, '像素化结果')" />
+                  <canvas ref="pixelCanvas" style="max-width: 100%; height: auto; cursor: pointer; background: repeating-conic-gradient(45deg, #f0f0f0 25%, transparent 25%, transparent 75%, #f0f0f0 25%); background-color: transparent;" @click="openImagePreview(pixelCanvas, '像素化结果')" />
                   <div class="q-mt-md">
                     <q-btn
                       color="secondary"
@@ -352,6 +383,7 @@
 import { ref, reactive, onMounted, onUnmounted, nextTick, watch } from 'vue';
 import { useQuasar } from 'quasar';
 import { saveAs } from 'file-saver';
+import UPNG from 'upng-js';
 import { createPixelWorker } from 'src/pixel/workerApi';
 import type { PipelineParams, PipelineResult } from 'src/pixel/types';
 import InlineImageViewer from 'src/components/InlineImageViewer.vue';
@@ -374,6 +406,9 @@ let workerInstance: ReturnType<typeof createPixelWorker> | null = null;
 const imagePreviewDialog = ref(false);
 const previewImageSrc = ref('');
 const previewImageName = ref('');
+
+// 直接采样模式开关
+const useDirectSampling = ref(false);
 
 // 能量算法参数
 const params = reactive<PipelineParams>({
@@ -401,7 +436,24 @@ const sampleModeOptions = [
   { label: '中心采样', value: 'center' },
   { label: '平均采样', value: 'average' },
   { label: '加权平均', value: 'weighted' },
+  { label: '直接按比例采样（普通图片）', value: 'direct' },
 ];
+
+// 监听直接采样模式切换
+watch(useDirectSampling, (newValue) => {
+  if (newValue) {
+    params.sampleMode = 'direct';
+    // 切换到直接采样模式时，设置默认像素大小
+    if (params.pixelSize === 0) {
+      params.pixelSize = 8;
+    }
+  } else {
+    // 切换回其他模式时，默认选择中心采样
+    if (params.sampleMode === 'direct') {
+      params.sampleMode = 'center';
+    }
+  }
+});
 
 // 初始化Worker
 onMounted(() => {
@@ -672,30 +724,56 @@ function renderDebugImage() {
 function renderPixelArt() {
   if (!result.value?.pixelArt || !pixelCanvas.value) return;
 
-  const { width, height, rgb } = result.value.pixelArt;
+  const { width, height, rgb, rgba } = result.value.pixelArt;
 
   pixelCanvas.value.width = width;
   pixelCanvas.value.height = height;
 
   const ctx = pixelCanvas.value.getContext('2d')!;
 
-  // 创建RGB图像数据
-  const rgbData = new Uint8Array(rgb);
+  // 创建图像数据
   const imageData = ctx.createImageData(width, height);
 
-  for (let i = 0; i < rgbData.length / 3; i++) {
-    const idx = i * 4;
-    const rgbIdx = i * 3;
-    imageData.data[idx] = rgbData[rgbIdx] || 0;         // R
-    imageData.data[idx + 1] = rgbData[rgbIdx + 1] || 0; // G
-    imageData.data[idx + 2] = rgbData[rgbIdx + 2] || 0; // B
-    imageData.data[idx + 3] = 255;                  // A
+  if (rgba) {
+    // 如果有RGBA数据，使用透明度
+    const rgbaData = new Uint8Array(rgba);
+    for (let i = 0; i < width * height; i++) {
+      const idx = i * 4;
+      imageData.data[idx] = rgbaData[idx] || 0;         // R
+      imageData.data[idx + 1] = rgbaData[idx + 1] || 0; // G
+      imageData.data[idx + 2] = rgbaData[idx + 2] || 0; // B
+      imageData.data[idx + 3] = rgbaData[idx + 3] || 255; // A
+    }
+  } else {
+    // 否则使用RGB数据，默认不透明
+    const rgbData = new Uint8Array(rgb);
+    for (let i = 0; i < width * height; i++) {
+      const idx = i * 4;
+      const rgbIdx = i * 3;
+      imageData.data[idx] = rgbData[rgbIdx] || 0;         // R
+      imageData.data[idx + 1] = rgbData[rgbIdx + 1] || 0; // G
+      imageData.data[idx + 2] = rgbData[rgbIdx + 2] || 0; // B
+      imageData.data[idx + 3] = 255;                  // A
+    }
   }
 
   ctx.putImageData(imageData, 0, 0);
 
   // 如果是像素画，禁用图像平滑以获得清晰的像素效果
   ctx.imageSmoothingEnabled = false;
+
+  // 调试：检查透明度数据
+  if (rgba) {
+    const rgbaData = new Uint8Array(rgba);
+    let transparentPixels = 0;
+    let totalPixels = 0;
+    for (let i = 0; i < rgbaData.length; i += 4) {
+      totalPixels++;
+      const alpha = rgbaData[i + 3];
+      if (alpha !== undefined && alpha < 128) transparentPixels++;
+    }
+    console.log(`像素画渲染调试: 总像素=${totalPixels}, 透明像素=${transparentPixels}, 透明比例=${(transparentPixels/totalPixels*100).toFixed(1)}%`);
+  }
 }
 
 // 下载纯能量图
@@ -706,7 +784,7 @@ function downloadEnergy() {
     if (blob) {
       saveAs(blob, `energy_${Date.now()}.png`);
     }
-  });
+  }, 'image/png');
 }
 
 // 下载调试图像（能量图+网格线）
@@ -717,27 +795,162 @@ function downloadDebug() {
     if (blob) {
       saveAs(blob, `energy_debug_${Date.now()}.png`);
     }
-  });
+  }, 'image/png');
 }
 
 // 下载像素画
 function downloadPixelArt() {
-  if (!pixelCanvas.value) return;
+  if (!result.value?.pixelArt) return;
 
-  pixelCanvas.value.toBlob((blob) => {
-    if (blob) {
-      saveAs(blob, `pixel_art_${Date.now()}.png`);
+  const { width, height, rgba, rgb } = result.value.pixelArt;
+
+  // 如果有 RGBA 数据，直接从原始数据生成 PNG
+  if (rgba) {
+    const rgbaData = new Uint8Array(rgba);
+
+    console.log(`下载调试: width=${width}, height=${height}, rgba长度=${rgbaData.length}, 期望长度=${width * height * 4}`);
+
+    // 确保数据长度正确
+    const expectedLength = width * height * 4;
+    const correctedData = rgbaData.length === expectedLength ? rgbaData : new Uint8Array(expectedLength);
+
+    if (rgbaData.length !== expectedLength) {
+      console.log(`数据长度不匹配，需要修正: 实际=${rgbaData.length}, 期望=${expectedLength}`);
+      // 如果长度不匹配，复制可用的数据
+      const copyLength = Math.min(rgbaData.length, expectedLength);
+      for (let i = 0; i < copyLength; i++) {
+        const value = rgbaData[i];
+        correctedData[i] = value !== undefined ? value : 0;
+      }
+      // 填充剩余的透明像素
+      for (let i = copyLength; i < expectedLength; i++) {
+        correctedData[i] = i % 4 === 3 ? 0 : 255; // Alpha=0, RGB=255
+      }
     }
-  });
+
+    // 检查前几个像素的数据
+    console.log(`前16个字节数据:`, Array.from(correctedData.slice(0, 16)));
+
+    // 查找第一个非透明像素
+    let firstNonTransparentIndex = -1;
+    for (let i = 0; i < correctedData.length; i += 4) {
+      const alpha = correctedData[i + 3];
+      if (alpha !== undefined && alpha > 0) {
+        firstNonTransparentIndex = i;
+        break;
+      }
+    }
+    if (firstNonTransparentIndex >= 0) {
+      const pixelIndex = firstNonTransparentIndex / 4;
+      const x = pixelIndex % width;
+      const y = Math.floor(pixelIndex / width);
+      console.log(`第一个非透明像素位置: 索引${pixelIndex}, 坐标(${x},${y}), RGBA:`,
+        Array.from(correctedData.slice(firstNonTransparentIndex, firstNonTransparentIndex + 4)));
+    }
+
+    // 统计非透明像素
+    let nonTransparentPixels = 0;
+    for (let i = 0; i < correctedData.length; i += 4) {
+      const alpha = correctedData[i + 3];
+      if (alpha !== undefined && alpha > 0) nonTransparentPixels++;
+    }
+    console.log(`非透明像素数量: ${nonTransparentPixels}/${width * height}`);
+
+    // 使用正确的 upng-js 编码方式：传入 ArrayBuffer
+    let pngData: Uint8Array | undefined;
+
+    try {
+      // 关键：传入 ArrayBuffer，不是 Uint8Array
+      pngData = UPNG.encode([correctedData.buffer.slice(correctedData.byteOffset, correctedData.byteOffset + correctedData.byteLength)], width, height, 0);
+      console.log(`PNG编码结果: ${pngData?.length || 'undefined'}`);
+    } catch (e) {
+      console.error('PNG编码失败:', e);
+    }
+
+    if (!pngData || pngData.length === 0) {
+      console.error('PNG编码失败，回退到Canvas方法');
+      // 回退到Canvas方法
+      if (pixelCanvas.value) {
+        pixelCanvas.value.toBlob((blob) => {
+          if (blob) {
+            saveAs(blob, `pixel_art_${Date.now()}.png`);
+          }
+        }, 'image/png');
+      }
+      return;
+    }
+
+    console.log(`PNG编码成功, 数据长度: ${pngData.length}`);
+
+    // 创建 Blob 并下载
+    const blob = new Blob([pngData as BlobPart], { type: 'image/png' });
+    saveAs(blob, `pixel_art_${Date.now()}.png`);
+  } else if (rgb) {
+    // 如果只有 RGB 数据，转换为 RGBA（不透明）
+    const rgbData = new Uint8Array(rgb);
+    const rgbaData = new Uint8Array(width * height * 4);
+
+    for (let i = 0; i < width * height; i++) {
+      const rgbIdx = i * 3;
+      const rgbaIdx = i * 4;
+      rgbaData[rgbaIdx] = rgbData[rgbIdx] || 0;         // R
+      rgbaData[rgbaIdx + 1] = rgbData[rgbIdx + 1] || 0; // G
+      rgbaData[rgbaIdx + 2] = rgbData[rgbIdx + 2] || 0; // B
+      rgbaData[rgbaIdx + 3] = 255;                      // A (不透明)
+    }
+
+    // 使用 upng-js 编码 PNG
+    const pngData = UPNG.encode([rgbaData as ArrayBuffer], width, height, 0, 6);
+
+    // 创建 Blob 并下载
+    const blob = new Blob([pngData as BlobPart], { type: 'image/png' });
+    saveAs(blob, `pixel_art_${Date.now()}.png`);
+  }
+}
+
+// 从 RGBA 数据生成 PNG data URL
+function createPngDataUrl(width: number, height: number, rgbaData: Uint8Array): string {
+  // 确保数据长度正确
+  const expectedLength = width * height * 4;
+  const correctedData = rgbaData.length === expectedLength ? rgbaData : new Uint8Array(expectedLength);
+
+  if (rgbaData.length !== expectedLength) {
+    // 如果长度不匹配，复制可用的数据
+    const copyLength = Math.min(rgbaData.length, expectedLength);
+    for (let i = 0; i < copyLength; i++) {
+      const value = rgbaData[i];
+      correctedData[i] = value !== undefined ? value : 0;
+    }
+    // 填充剩余的透明像素
+    for (let i = copyLength; i < expectedLength; i++) {
+      correctedData[i] = i % 4 === 3 ? 0 : 255; // Alpha=0, RGB=255
+    }
+  }
+
+  // 使用正确的 upng-js 编码方式：传入 ArrayBuffer
+  const arrayBuffer = correctedData.buffer.slice(correctedData.byteOffset, correctedData.byteOffset + correctedData.byteLength) as ArrayBuffer;
+  const pngData = UPNG.encode([arrayBuffer], width, height, 0);
+  const blob = new Blob([pngData as BlobPart], { type: 'image/png' });
+  return URL.createObjectURL(blob);
 }
 
 // 打开图片预览器
 function openImagePreview(canvas: HTMLCanvasElement | null, imageName: string) {
   if (!canvas) return;
 
-  previewImageName.value = imageName;
-  previewImageSrc.value = canvas.toDataURL();
-  imagePreviewDialog.value = true;
+  // 如果是像素画预览，并且有 RGBA 数据，直接从原始数据生成
+  if (imageName === '像素化结果' && result.value?.pixelArt?.rgba) {
+    const { width, height, rgba } = result.value.pixelArt;
+    const rgbaData = new Uint8Array(rgba);
+    previewImageName.value = imageName;
+    previewImageSrc.value = createPngDataUrl(width, height, rgbaData);
+    imagePreviewDialog.value = true;
+  } else {
+    // 其他情况使用 canvas
+    previewImageName.value = imageName;
+    previewImageSrc.value = canvas.toDataURL();
+    imagePreviewDialog.value = true;
+  }
 }
 </script>
 

@@ -24,6 +24,7 @@
     "file-saver": "^2.0.5",
     "pinia": "^3.0.1",
     "quasar": "^2.16.0",
+    "upng-js": "^2.1.0",
     "vue": "^3.5.22",
     "vue-i18n": "^11.0.0",
     "vue-router": "^4.0.12"
@@ -33,6 +34,7 @@
     "@intlify/unplugin-vue-i18n": "^4.0.0",
     "@quasar/app-vite": "^2.1.0",
     "@types/node": "^20.5.9",
+    "@types/pngjs": "^6.0.5",
     "@vue/eslint-config-prettier": "^10.1.0",
     "@vue/eslint-config-typescript": "^14.4.0",
     "autoprefixer": "^10.4.2",

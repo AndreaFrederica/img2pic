@@ -13,13 +13,20 @@
       >
         <div v-if="imageSrc" class="viewer-transform" :style="transformStyle">
           <!-- 基于 Quasar 的图片组件 -->
-          <q-img
-            :src="imageSrc"
-            :alt="imageName || 'image'"
-            class="viewer-img"
-            fit="contain"
-            :draggable="false"
-          />
+            <q-img
+              :src="imageSrc"
+              :alt="imageName || 'image'"
+              class="viewer-img"
+              fit="contain"
+              :draggable="false"
+            />
+
+          <!-- 调试信息 -->
+          <div v-if="imageSrc" style="position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.8); color: white; padding: 5px; font-size: 12px; border-radius: 4px;">
+            <div>图片信息调试:</div>
+            <div>src: {{ imageSrc.substring(0, 50) }}...</div>
+            <div v-if="imageSrc.length > 50">长度: {{ imageSrc.length }}</div>
+          </div>
         </div>
 
         <!-- 双指缩放中心点指示器 -->
@@ -499,7 +506,15 @@ watch(
   border: 1px solid var(--vscode-border);
   border-radius: 0;
   overflow: hidden;
-  background: var(--vscode-editor-background);
+  /* 棋盘格背景用于显示透明区域 */
+  background-image:
+    linear-gradient(45deg, #f0f0f0 25%, transparent 25%),
+    linear-gradient(-45deg, #f0f0f0 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #f0f0f0 75%),
+    linear-gradient(-45deg, transparent 75%, #f0f0f0 75%);
+  background-size: 10px 10px;
+  background-position: 0 0, 0 5px, 5px -5px, -5px 0px;
+  background-color: white;
   z-index: 1;
 }
 

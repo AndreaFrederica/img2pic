@@ -1,4 +1,4 @@
-export type SampleMode = "center" | "average" | "weighted";
+export type SampleMode = "center" | "average" | "weighted" | "direct";
 
 export interface PipelineParams {
   sigma: number;
@@ -38,6 +38,7 @@ export interface PixelArtResult {
   width: number;
   height: number;
   rgb: ArrayBuffer; // Uint8Array length = w*h*3
+  rgba?: ArrayBuffer | undefined; // Uint8Array length = w*h*4 - 可选，用于支持透明度
   upscaleFactor: number;
 }
 

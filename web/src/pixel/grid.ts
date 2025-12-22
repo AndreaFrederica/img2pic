@@ -328,6 +328,179 @@ export function completeEdges(
   return out;
 }
 
+export function samplePixelArtDirect(
+  rgb: Uint8ClampedArray,
+  width: number,
+  height: number,
+  targetWidth: number,
+  targetHeight: number,
+  mode: SampleMode,
+  weightRatio: number,
+  upscaleFactor: number,
+  nativeRes: boolean
+): { outW: number; outH: number; outRgb: Uint8Array; outRgba?: Uint8Array } {
+  const cellW = targetWidth;
+  const cellH = targetHeight;
+
+  const outW = nativeRes ? cellW : cellW * upscaleFactor;
+  const outH = nativeRes ? cellH : cellH * upscaleFactor;
+  const outRgb = new Uint8Array(outW * outH * 3);
+  const outRgba = new Uint8Array(outW * outH * 4);
+
+  const scaleX = width / cellW;
+  const scaleY = height / cellH;
+
+  function getRgba(x: number, y: number): [number, number, number, number] {
+    // 边界检查：确保坐标在有效范围内
+    const clampedX = Math.max(0, Math.min(x, width - 1));
+    const clampedY = Math.max(0, Math.min(y, height - 1));
+    const i = (clampedY * width + clampedX) * 4;
+    return [rgb[i] || 0, rgb[i + 1] || 0, rgb[i + 2] || 0, rgb[i + 3] || 0];
+  }
+
+  function getRgbaInterpolated(x: number, y: number): [number, number, number, number] {
+    // 边界检查：确保坐标在有效范围内
+    const clampedX = Math.max(0, Math.min(x, width - 1));
+    const clampedY = Math.max(0, Math.min(y, height - 1));
+
+    const x1 = Math.floor(clampedX);
+    const y1 = Math.floor(clampedY);
+    const x2 = Math.min(x1 + 1, width - 1);
+    const y2 = Math.min(y1 + 1, height - 1);
+
+    const fx = clampedX - x1;
+    const fy = clampedY - y1;
+
+    const [r1, g1, b1, a1] = getRgba(x1, y1);
+    const [r2, g2, b2, a2] = getRgba(x2, y1);
+    const [r3, g3, b3, a3] = getRgba(x1, y2);
+    const [r4, g4, b4, a4] = getRgba(x2, y2);
+
+    // 使用预乘 alpha 进行插值，避免透明像素的黑色边缘
+    const w1 = (1 - fx) * (1 - fy);
+    const w2 = fx * (1 - fy);
+    const w3 = (1 - fx) * fy;
+    const w4 = fx * fy;
+
+    // 先插值 alpha
+    const a = Math.round(a1 * w1 + a2 * w2 + a3 * w3 + a4 * w4);
+
+    // 对于 RGB，使用预乘 alpha 插值
+    const r = Math.round((r1 * a1 * w1 + r2 * a2 * w2 + r3 * a3 * w3 + r4 * a4 * w4) / Math.max(a, 1));
+    const g = Math.round((g1 * a1 * w1 + g2 * a2 * w2 + g3 * a3 * w3 + g4 * a4 * w4) / Math.max(a, 1));
+    const b = Math.round((b1 * a1 * w1 + b2 * a2 * w2 + b3 * a3 * w3 + b4 * a4 * w4) / Math.max(a, 1));
+
+    return [r, g, b, a];
+  }
+
+  for (let j = 0; j < cellH; j++) {
+    for (let i = 0; i < cellW; i++) {
+      const centerX = (i + 0.5) * scaleX;
+      const centerY = (j + 0.5) * scaleY;
+
+      let r = 0, g = 0, b = 0, a = 255;
+
+      if (mode === "direct") {
+        // 使用双线性插值获得更好的质量
+        [r, g, b, a] = getRgbaInterpolated(centerX, centerY);
+      } else if (mode === "center") {
+        const x = Math.max(0, Math.min(Math.floor(centerX), width - 1));
+        const y = Math.max(0, Math.min(Math.floor(centerY), height - 1));
+        [r, g, b, a] = getRgba(x, y);
+      } else if (mode === "average") {
+        // 计算当前像素对应的源图像区域
+        const x1 = Math.max(0, Math.floor(i * scaleX));
+        const y1 = Math.max(0, Math.floor(j * scaleY));
+        const x2 = Math.min(Math.floor((i + 1) * scaleX), width - 1);
+        const y2 = Math.min(Math.floor((j + 1) * scaleY), height - 1);
+
+        let sumR = 0, sumG = 0, sumB = 0, sumA = 0;
+        let cnt = 0;
+        for (let y = y1; y <= y2; y++) {
+          for (let x = x1; x <= x2; x++) {
+            const [rr, gg, bb, aa] = getRgba(x, y);
+            // 使用预乘 alpha
+            sumR += rr * aa;
+            sumG += gg * aa;
+            sumB += bb * aa;
+            sumA += aa;
+            cnt++;
+          }
+        }
+        if (cnt > 0) {
+          // 计算平均 alpha 值
+          const avgA = sumA / cnt;
+          r = Math.round(sumR / cnt);
+          g = Math.round(sumG / cnt);
+          b = Math.round(sumB / cnt);
+          a = Math.round(avgA);
+        } else {
+          // 如果没有有效像素，设置为透明
+          r = 0;
+          g = 0;
+          b = 0;
+          a = 0;
+        }
+      } else {
+        // weighted 模式
+        const regionSize = Math.max(1, Math.floor(scaleX * weightRatio));
+        const x1 = Math.max(0, Math.floor(centerX - regionSize / 2));
+        const y1 = Math.max(0, Math.floor(centerY - regionSize / 2));
+        const x2 = Math.min(width - 1, Math.floor(centerX + regionSize / 2));
+        const y2 = Math.min(height - 1, Math.floor(centerY + regionSize / 2));
+
+        let sumR = 0, sumG = 0, sumB = 0, sumA = 0;
+        let cnt = 0;
+        for (let y = y1; y <= y2; y++) {
+          for (let x = x1; x <= x2; x++) {
+            const [rr, gg, bb, aa] = getRgba(x, y);
+            // 使用预乘 alpha
+            sumR += rr * aa;
+            sumG += gg * aa;
+            sumB += bb * aa;
+            sumA += aa;
+            cnt++;
+          }
+        }
+        if (cnt > 0) {
+          // 计算平均 alpha 值
+          const avgA = sumA / cnt;
+          r = Math.round(sumR / cnt);
+          g = Math.round(sumG / cnt);
+          b = Math.round(sumB / cnt);
+          a = Math.round(avgA);
+        } else {
+          // 如果没有有效像素，设置为透明
+          r = 0;
+          g = 0;
+          b = 0;
+          a = 0;
+        }
+      }
+
+      if (nativeRes) {
+        const o = (j * outW + i) * 3;
+        const o4 = (j * outW + i) * 4;
+        outRgb[o] = r; outRgb[o + 1] = g; outRgb[o + 2] = b;
+        outRgba[o4] = r; outRgba[o4 + 1] = g; outRgba[o4 + 2] = b; outRgba[o4 + 3] = a;
+      } else {
+        const ox = i * upscaleFactor;
+        const oy = j * upscaleFactor;
+        for (let yy = 0; yy < upscaleFactor; yy++) {
+          for (let xx = 0; xx < upscaleFactor; xx++) {
+            const o = ((oy + yy) * outW + (ox + xx)) * 3;
+            const o4 = ((oy + yy) * outW + (ox + xx)) * 4;
+            outRgb[o] = r; outRgb[o + 1] = g; outRgb[o + 2] = b;
+            outRgba[o4] = r; outRgba[o4 + 1] = g; outRgba[o4 + 2] = b; outRgba[o4 + 3] = a;
+          }
+        }
+      }
+    }
+  }
+
+  return { outW, outH, outRgb, outRgba };
+}
+
 export function samplePixelArt(
   rgb: Uint8ClampedArray,
   width: number,
@@ -338,17 +511,18 @@ export function samplePixelArt(
   weightRatio: number,
   upscaleFactor: number,
   nativeRes: boolean
-): { outW: number; outH: number; outRgb: Uint8Array } {
+): { outW: number; outH: number; outRgb: Uint8Array; outRgba?: Uint8Array } {
   const cellW = allX.length - 1;
   const cellH = allY.length - 1;
 
   const outW = nativeRes ? cellW : cellW * upscaleFactor;
   const outH = nativeRes ? cellH : cellH * upscaleFactor;
   const outRgb = new Uint8Array(outW * outH * 3);
+  const outRgba = new Uint8Array(outW * outH * 4);
 
-  function getRgb(x: number, y: number): [number, number, number] {
+  function getRgba(x: number, y: number): [number, number, number, number] {
     const i = (y * width + x) * 4;
-    return [rgb[i] || 0, rgb[i + 1] || 0, rgb[i + 2] || 0];
+    return [rgb[i] || 0, rgb[i + 1] || 0, rgb[i + 2] || 0, rgb[i + 3] || 0];
   }
 
   for (let i = 0; i < cellW; i++) {
@@ -361,20 +535,20 @@ export function samplePixelArt(
       const y2 = allY[j + 1]!;
       const cy = ((y1 + y2) / 2) | 0;
 
-      let r = 0, g = 0, b = 0;
+      let r = 0, g = 0, b = 0, a = 255;
 
       if (mode === "center") {
-        [r, g, b] = getRgb(cx, cy);
+        [r, g, b, a] = getRgba(cx, cy);
       } else if (mode === "average") {
         let cnt = 0;
         for (let y = y1; y < y2; y++) {
           for (let x = x1; x < x2; x++) {
-            const [rr, gg, bb] = getRgb(x, y);
-            r += rr; g += gg; b += bb; cnt++;
+            const [rr, gg, bb, aa] = getRgba(x, y);
+            r += rr; g += gg; b += bb; a += aa; cnt++;
           }
         }
         if (cnt > 0) {
-          r = (r / cnt) | 0; g = (g / cnt) | 0; b = (b / cnt) | 0;
+          r = (r / cnt) | 0; g = (g / cnt) | 0; b = (b / cnt) | 0; a = (a / cnt) | 0;
         }
       } else {
         const cw = x2 - x1;
@@ -388,30 +562,34 @@ export function samplePixelArt(
         let cnt = 0;
         for (let y = wy1; y < wy2; y++) {
           for (let x = wx1; x < wx2; x++) {
-            const [rr, gg, bb] = getRgb(x, y);
-            r += rr; g += gg; b += bb; cnt++;
+            const [rr, gg, bb, aa] = getRgba(x, y);
+            r += rr; g += gg; b += bb; a += aa; cnt++;
           }
         }
         if (cnt > 0) {
-          r = (r / cnt) | 0; g = (g / cnt) | 0; b = (b / cnt) | 0;
+          r = (r / cnt) | 0; g = (g / cnt) | 0; b = (b / cnt) | 0; a = (a / cnt) | 0;
         }
       }
 
       if (nativeRes) {
         const o = (j * outW + i) * 3;
+        const o4 = (j * outW + i) * 4;
         outRgb[o] = r; outRgb[o + 1] = g; outRgb[o + 2] = b;
+        outRgba[o4] = r; outRgba[o4 + 1] = g; outRgba[o4 + 2] = b; outRgba[o4 + 3] = a;
       } else {
         const ox = i * upscaleFactor;
         const oy = j * upscaleFactor;
         for (let yy = 0; yy < upscaleFactor; yy++) {
           for (let xx = 0; xx < upscaleFactor; xx++) {
             const o = ((oy + yy) * outW + (ox + xx)) * 3;
+            const o4 = ((oy + yy) * outW + (ox + xx)) * 4;
             outRgb[o] = r; outRgb[o + 1] = g; outRgb[o + 2] = b;
+            outRgba[o4] = r; outRgba[o4 + 1] = g; outRgba[o4 + 2] = b; outRgba[o4 + 3] = a;
           }
         }
       }
     }
   }
 
-  return { outW, outH, outRgb };
+  return { outW, outH, outRgb, outRgba };
 }

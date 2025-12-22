@@ -1,7 +1,9 @@
 {
     "cSpell.words": [
         "autocorr",
+        "cnum",
         "Comlink",
+        "ctype",
         "detrend",
         "energ",
         "FASTOCTREE",
@@ -24,6 +26,7 @@
         "scikit",
         "scipy",
         "sirrus",
-        "sobel"
+        "sobel",
+        "upng"
     ]
 }
