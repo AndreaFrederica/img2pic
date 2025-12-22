@@ -52,11 +52,23 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import EssentialLink, { type EssentialLinkProps } from 'components/EssentialLink.vue';
+import { storageService } from 'src/utils/storage';
 
 const { locale, t } = useI18n();
+
+// Load saved language on component mount
+const savedLanguage = storageService.loadLanguage();
+if (savedLanguage) {
+  locale.value = savedLanguage;
+}
+
+// Watch for language changes and save to localStorage
+watch(locale, (newLocale) => {
+  storageService.saveLanguage(newLocale);
+});
 
 // 语言选项
 const languageOptions = [

@@ -396,6 +396,7 @@ import UPNG from 'upng-js';
 import { createPixelWorker } from 'src/pixel/workerApi';
 import type { PipelineParams, PipelineResult } from 'src/pixel/types';
 import InlineImageViewer from 'src/components/InlineImageViewer.vue';
+import { storageService } from 'src/utils/storage';
 
 const $q = useQuasar();
 const { t } = useI18n();
@@ -466,11 +467,101 @@ watch(useDirectSampling, (newValue) => {
   }
 });
 
-// 初始化Worker
+// Watch for all parameter changes and save to localStorage
+watch(
+  [
+    () => params.sigma,
+    () => params.gapTolerance,
+    () => params.minEnergy,
+    () => params.smooth,
+    () => params.enhanceEnergy,
+    () => params.enhanceDirectional,
+    () => params.enhanceHorizontal,
+    () => params.enhanceVertical,
+    () => params.pixelSize,
+    () => params.minS,
+    () => params.maxS,
+    () => params.sample,
+    () => params.sampleMode,
+    () => params.sampleWeightRatio,
+    () => params.upscale,
+    () => params.nativeRes,
+    showDebug,
+    useDirectSampling,
+  ],
+  () => {
+    // Debounced save to avoid excessive writes
+    if (saveTimeout) {
+      clearTimeout(saveTimeout);
+    }
+    saveTimeout = setTimeout(() => {
+      const pixelSettings = {
+        gaussianBlur: params.sigma,
+        gapTolerance: params.gapTolerance,
+        minEnergyThreshold: params.minEnergy,
+        smoothWindowSize: params.smooth,
+        enableEnergyEnhancement: params.enhanceEnergy,
+        directionalEnhancement: params.enhanceDirectional,
+        horizontalEnhancement: params.enhanceHorizontal,
+        verticalEnhancement: params.enhanceVertical,
+        pixelSizeMode: params.pixelSize === 0 ? 'auto' : 'manual',
+        pixelSize: params.pixelSize,
+        minPixelSize: params.minS,
+        maxPixelSize: params.maxS,
+        sampleMode: params.sampleMode,
+        upScaleFactor: params.upscale,
+        showOriginalImage: true,
+        showEnergyMap: showDebug.value,
+        showGridLines: showDebug.value,
+        showPixelatedResult: true,
+        weightedRatio: params.sampleWeightRatio,
+        nativeResolution: params.nativeRes,
+      } as const;
+      storageService.savePixelSettings(pixelSettings);
+      console.log('Settings saved:', pixelSettings);
+    }, 500);
+  },
+  { deep: true }
+);
+
+// Debounce timeout for saving
+let saveTimeout: NodeJS.Timeout | null = null;
+
+// Load saved settings on component mount
 onMounted(() => {
   console.log('Component mounted, creating worker');
   workerInstance = createPixelWorker();
   console.log('Worker created', !!workerInstance);
+
+  // Load saved pixel settings
+  const savedPixelSettings = storageService.loadPixelSettings();
+  if (savedPixelSettings) {
+    // Apply saved settings to reactive params
+    Object.assign(params, {
+      sigma: savedPixelSettings.gaussianBlur || 1.0,
+      gapTolerance: savedPixelSettings.gapTolerance || 2,
+      minEnergy: savedPixelSettings.minEnergyThreshold || 0.15,
+      smooth: savedPixelSettings.smoothWindowSize || 3,
+      enhanceEnergy: savedPixelSettings.enableEnergyEnhancement || false,
+      enhanceDirectional: savedPixelSettings.directionalEnhancement || false,
+      enhanceHorizontal: savedPixelSettings.horizontalEnhancement || 1.0,
+      enhanceVertical: savedPixelSettings.verticalEnhancement || 1.0,
+      pixelSize: savedPixelSettings.pixelSize || 0,
+      minS: savedPixelSettings.minPixelSize || 4,
+      maxS: savedPixelSettings.maxPixelSize || 40,
+      sample: savedPixelSettings.sampleMode ? true : true,
+      sampleMode: savedPixelSettings.sampleMode || 'center',
+      sampleWeightRatio: savedPixelSettings.weightedRatio || 0.6,
+      upscale: savedPixelSettings.upScaleFactor || 0,
+      nativeRes: savedPixelSettings.nativeResolution || false,
+    });
+
+    // Apply display settings
+    showDebug.value = savedPixelSettings.showEnergyMap !== false;
+    useDirectSampling.value = savedPixelSettings.sampleMode === 'direct';
+
+    console.log('Loaded saved settings:', savedPixelSettings);
+  }
 });
 
 onUnmounted(() => {
