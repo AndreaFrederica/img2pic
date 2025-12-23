@@ -27,6 +27,17 @@ interface StorageSettings {
     pureUpscaleMode: boolean;
     pureUpscaleFactor: number;
     processingMode?: 'energy' | 'directSampling' | 'pureUpscale' | 'edgeDetect';
+    // 边缘检测模式参数
+    edgeDetectThreshold?: number;
+    edgeDetectMinGridSize?: number;
+    edgeDetectMaxGridSize?: number;
+    edgeDetectPixelSize?: number;
+    edgeDetectOffsetX?: number;
+    edgeDetectOffsetY?: number;
+    edgeDetectUpscale?: number;
+    edgeDetectNativeRes?: boolean;
+    edgeDetectSampleMode?: string;
+    edgeDetectSampleWeightRatio?: number;
   };
 }
 

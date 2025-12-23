@@ -1058,6 +1058,17 @@ watch(
     pureUpscaleMode,
     pureUpscaleFactor,
     processingMode,
+    // 边缘检测参数
+    () => edgeDetectParams.edgeThreshold,
+    () => edgeDetectParams.pixelSize,
+    () => edgeDetectParams.minGridSize,
+    () => edgeDetectParams.maxGridSize,
+    () => edgeDetectParams.offsetX,
+    () => edgeDetectParams.offsetY,
+    () => edgeDetectParams.upscale,
+    () => edgeDetectParams.nativeRes,
+    () => edgeDetectParams.sampleMode,
+    () => edgeDetectParams.sampleWeightRatio,
   ],
   () => {
     // Debounced save to avoid excessive writes
@@ -1091,6 +1102,17 @@ watch(
         pureUpscaleMode: pureUpscaleMode.value,
         pureUpscaleFactor: pureUpscaleFactor.value,
         processingMode: processingMode.value,
+        // 边缘检测模式参数
+        edgeDetectThreshold: edgeDetectParams.edgeThreshold,
+        edgeDetectMinGridSize: edgeDetectParams.minGridSize,
+        edgeDetectMaxGridSize: edgeDetectParams.maxGridSize,
+        edgeDetectPixelSize: edgeDetectParams.pixelSize,
+        edgeDetectOffsetX: edgeDetectParams.offsetX,
+        edgeDetectOffsetY: edgeDetectParams.offsetY,
+        edgeDetectUpscale: edgeDetectParams.upscale,
+        edgeDetectNativeRes: edgeDetectParams.nativeRes,
+        edgeDetectSampleMode: edgeDetectParams.sampleMode,
+        edgeDetectSampleWeightRatio: edgeDetectParams.sampleWeightRatio,
       } as const;
       storageService.savePixelSettings(pixelSettings);
       console.log('Settings saved:', pixelSettings);
@@ -1175,6 +1197,20 @@ onMounted(() => {
         processingMode.value = 'energy';
       }
     }
+
+    // 加载边缘检测模式参数
+    Object.assign(edgeDetectParams, {
+      edgeThreshold: savedPixelSettings.edgeDetectThreshold ?? 0.1,
+      pixelSize: savedPixelSettings.edgeDetectPixelSize ?? 0,
+      minGridSize: savedPixelSettings.edgeDetectMinGridSize ?? 2,
+      maxGridSize: savedPixelSettings.edgeDetectMaxGridSize ?? 20,
+      offsetX: savedPixelSettings.edgeDetectOffsetX ?? 0,
+      offsetY: savedPixelSettings.edgeDetectOffsetY ?? 0,
+      upscale: savedPixelSettings.edgeDetectUpscale ?? 4,
+      nativeRes: savedPixelSettings.edgeDetectNativeRes ?? false,
+      sampleMode: savedPixelSettings.edgeDetectSampleMode ?? 'center',
+      sampleWeightRatio: savedPixelSettings.edgeDetectSampleWeightRatio ?? 0.6,
+    });
 
     console.log('Loaded saved settings:', savedPixelSettings);
   }
