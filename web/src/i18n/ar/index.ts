@@ -41,6 +41,7 @@ export default {
   // Pixelization parameters
   pixelParams: {
     title: 'معلمات البكسلة',
+    pixelSizeParams: 'معلمات حجم البكسل',
     energyAlgorithmParams: 'معلمات خوارزمية الطاقة',
     gaussianBlur: 'التمويه الغاوسي (σ)',
     gaussianBlurDesc: 'يcontrol مستوى تمويه الصورة، القيم الأعلى تخلق تمويهًا أكثر لتنعيم الضوضاء',
@@ -74,7 +75,14 @@ export default {
 
   // Sampling mode
   samplingMode: {
+    mode: 'وضع المعالجة',
     title: 'وضع العينات',
+    energyMode: 'وضع خوارزمية الطاقة',
+    energyModeDesc: 'استخدام خوارزمية الطاقة للبكسلة، يدعم طرق العينات المتعددة',
+    directSamplingMode: 'العيّنات النسبية المباشرة',
+    directSamplingModeDesc: 'عيّنات الشبكة النسبية المباشرة لتوليد فن البكسل',
+    pureUpscaleMode: 'التحجيم النقي',
+    pureUpscaleModeDesc: 'تحجيم الصورة النقية بدون بكسلة',
     generatePixelArt: 'توليد فن البكسل',
     generatePixelArtDesc: 'عند التمكين، يولد فن البكسل بناءً على الشبكات المكتشفة؛ عند التعطيل، يظهر فقط خريطة الطاقة',
     directProportionalSampling: 'العيّنات النسبية المباشرة (للصور العادية)',
@@ -89,6 +97,8 @@ export default {
     upscaleFactor: 'عامل التحجيم',
     upscaleFactorDesc: 'عامل تحجيم صورة الإخراج، اضبط على 0 للحساب التلقائي',
     auto: 'تلقائي',
+    native: 'أصلي',
+    upscaleParams: 'عامل التحجيم',
     weightedRatio: 'النسبة الموزونة',
     weightedRatioDesc: 'نسبة وزن نقطة المركز لعينات المتوسط الموزون، القيم الأعلى تؤكد على البكسلات المركزية أكثر',
     directSamplingParams: 'معلمات العينات المباشرة',

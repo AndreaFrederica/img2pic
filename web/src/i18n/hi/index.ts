@@ -41,6 +41,7 @@ export default {
   // Pixelization parameters
   pixelParams: {
     title: 'पिक्सेलाइज़ेशन पैरामीटर',
+    pixelSizeParams: 'पिक्सेल साइज़ पैरामीटर',
     energyAlgorithmParams: 'ऊर्जा एल्गोरिथ्म पैरामीटर',
     gaussianBlur: 'गाऊसीयन ब्लर (σ)',
     gaussianBlurDesc: 'चित्र के ब्लर स्तर को नियंत्रित करता है, उच्च मान शोर सुधार के लिए अधिक ब्लर बनाते हैं',
@@ -74,7 +75,14 @@ export default {
 
   // Sampling mode
   samplingMode: {
+    mode: 'प्रोसेसिंग मोड',
     title: 'सैंपलिंग मोड',
+    energyMode: 'ऊर्जा एल्गोरिथ्म मोड',
+    energyModeDesc: 'पिक्सेलाइज़ेशन के लिए ऊर्जा एल्गोरिथ्म का उपयोग करें, कई सैंपलिंग विधियों का समर्थन करता है',
+    directSamplingMode: 'प्रत्यक्ष आनुपातिक सैंपलिंग',
+    directSamplingModeDesc: 'पिक्सेल आर्ट उत्पन्न करने के लिए प्रत्यक्ष आनुपातिक ग्रिड सैंपलिंग',
+    pureUpscaleMode: 'शुद्ध अपस्केल',
+    pureUpscaleModeDesc: 'बिना पिक्सेलाइज़ेशन के शुद्ध छवि अपस्केल',
     generatePixelArt: 'पिक्सेल आर्ट जेनरेट करें',
     generatePixelArtDesc: 'जब सक्षम होता है, तो डिटेक्टेड ग्रिड पर आधारित पिक्सेल आर्ट जेनरेट करता है; जब अक्षम होता है, तो केवल ऊर्जा मैप दिखाता है',
     directProportionalSampling: 'प्रत्यक्ष आनुपातिक सैंपलिंग (सामान्य चित्रों के लिए)',
@@ -89,6 +97,8 @@ export default {
     upscaleFactor: 'अपस्केल फैक्टर',
     upscaleFactorDesc: 'आउटपुट चित्र स्केलिंग फैक्टर, स्वचालित गणना के लिए 0 पर सेट करें',
     auto: 'ऑटो',
+    native: 'नेटिव',
+    upscaleParams: 'अपस्केल फैक्टर',
     weightedRatio: 'वेटेड रेशियो',
     weightedRatioDesc: 'वेटेड औसत सैंपलिंग के लिए केंद्र बिंदु वेट अनुपात, उच्च मान केंद्र पिक्सेलों को अधिक जोर देते हैं',
     directSamplingParams: 'प्रत्यक्ष सैंपलिंग पैरामीटर',

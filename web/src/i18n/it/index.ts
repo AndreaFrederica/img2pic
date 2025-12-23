@@ -41,6 +41,7 @@ export default {
   // Pixelization parameters
   pixelParams: {
     title: 'Parametri di Pixelizzazione',
+    pixelSizeParams: 'Parametri Dimensione Pixel',
     energyAlgorithmParams: 'Parametri Algoritmo Energia',
     gaussianBlur: 'Sfocatura Gaussiana (σ)',
     gaussianBlurDesc: 'Controlla il livello di sfocatura dell\'immagine, valori più alti creano più sfocatura per eliminare il rumore',
@@ -74,7 +75,14 @@ export default {
 
   // Sampling mode
   samplingMode: {
+    mode: 'Modalità di Elaborazione',
     title: 'Modalità Campionamento',
+    energyMode: 'Modalità Algoritmo Energia',
+    energyModeDesc: 'Usa algoritmo energia per pixelizzazione, supporta più metodi di campionamento',
+    directSamplingMode: 'Campionamento Proporzionale Diretto',
+    directSamplingModeDesc: 'Campionamento proporzionale diretto griglia per generare arte pixel',
+    pureUpscaleMode: 'Upscaling Puro',
+    pureUpscaleModeDesc: 'Scala immagine pura senza pixelizzazione',
     generatePixelArt: 'Genera Arte Pixel',
     generatePixelArtDesc: 'Quando abilitato, genera arte pixel basata su griglie rilevate; quando disabilitato, mostra solo la mappa energia',
     directProportionalSampling: 'Campionamento Proporzionale Diretto (per immagini normali)',
@@ -89,6 +97,8 @@ export default {
     upscaleFactor: 'Fattore Scalatura',
     upscaleFactorDesc: 'Fattore di scalatura immagine di output, imposta su 0 per calcolo automatico',
     auto: 'Automatico',
+    native: 'Nativo',
+    upscaleParams: 'Fattore Scalatura',
     weightedRatio: 'Rapporto Ponderato',
     weightedRatioDesc: 'Rapporto peso punto centrale per campionamento media ponderata, valori più alti enfatizzano di più i pixel centrali',
     directSamplingParams: 'Parametri Campionamento Diretto',

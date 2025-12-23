@@ -97,6 +97,7 @@ export default {
   // 像素化參數
   pixelParams: {
     title: '像素化參數',
+    pixelSizeParams: '像素大小參數',
     energyAlgorithmParams: '能量算法參數',
     gaussianBlur: '高斯模糊 (σ)',
     gaussianBlurDesc: '制圖像模糊之度，值大則模糊甚，用以平噪聲',
@@ -130,7 +131,14 @@ export default {
 
   // 採樣模式
   samplingMode: {
+    mode: '處理模式',
     title: '採樣模式',
+    energyMode: '能量算法模式',
+    energyModeDesc: '用能量算法行像素化，支持多種採樣方式',
+    directSamplingMode: '直接按比例採樣',
+    directSamplingModeDesc: '直接按比例網格採樣，生像素畫',
+    pureUpscaleMode: '純比例放大',
+    pureUpscaleModeDesc: '純比例放大圖像，不行像素化處理',
     generatePixelArt: '生成像素藝術',
     generatePixelArtDesc: '啟用時根據檢測之網格生成像素藝術，禁用時僅顯示能量圖',
     directProportionalSampling: '直接比例採樣（用於普通圖像）',
@@ -145,6 +153,8 @@ export default {
     upscaleFactor: '放大倍數',
     upscaleFactorDesc: '輸出圖像之放大倍數，設為0時自計最佳倍數',
     auto: '自動',
+    native: '原生',
+    upscaleParams: '放大倍數',
     weightedRatio: '加權比例',
     weightedRatioDesc: '加權平均採樣時中心點權重比例，值大則重中心像素',
     directSamplingParams: '直接採樣參數',

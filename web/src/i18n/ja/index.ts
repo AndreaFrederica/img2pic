@@ -97,6 +97,7 @@ export default {
   // ピクセル化パラメータ
   pixelParams: {
     title: 'ピクセル化パラメータ',
+    pixelSizeParams: 'ピクセルサイズパラメータ',
     energyAlgorithmParams: 'エネルギーアルゴリズムパラメータ',
     gaussianBlur: 'ガウスぼかし (σ)',
     gaussianBlurDesc: '画像のぼかしレベルを制御し、値が大きいほどノイズを滑らかにします',
@@ -130,7 +131,14 @@ export default {
 
   // サンプリングモード
   samplingMode: {
+    mode: '処理モード',
     title: 'サンプリングモード',
+    energyMode: 'エネルギーアルゴリズムモード',
+    energyModeDesc: 'エネルギーアルゴリズムを使用してピクセル化処理を行います。複数のサンプリング方式をサポート',
+    directSamplingMode: '直接比例サンプリング',
+    directSamplingModeDesc: '直接比例グリッドサンプリングでピクセルアートを生成',
+    pureUpscaleMode: '純粋拡大',
+    pureUpscaleModeDesc: '画像を純粋に拡大し、ピクセル化処理は行いません',
     generatePixelArt: 'ピクセルアートを生成',
     generatePixelArtDesc: '有効時は検出されたグリッドに基づいてピクセルアートを生成し、無効時はエネルギーマップのみ表示',
     directProportionalSampling: '直接比例サンプリング（通常の画像用）',
@@ -145,6 +153,8 @@ export default {
     upscaleFactor: '拡大倍率',
     upscaleFactorDesc: '出力画像の拡大倍率、0に設定すると自動計算',
     auto: '自動',
+    native: 'ネイティブ',
+    upscaleParams: '拡大倍率',
     weightedRatio: '加重比率',
     weightedRatioDesc: '加重平均サンプリング時の中心点重み比率、値が大きいほど中心ピクセルを重視します',
     directSamplingParams: '直接サンプリングパラメータ',

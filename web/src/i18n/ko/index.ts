@@ -41,6 +41,7 @@ export default {
   // Pixelization parameters
   pixelParams: {
     title: '픽셀화 매개변수',
+    pixelSizeParams: '픽셀 크기 매개변수',
     energyAlgorithmParams: '에너지 알고리즘 매개변수',
     gaussianBlur: '가우시안 블러 (σ)',
     gaussianBlurDesc: '이미지 블러 레벨을 제어합니다. 값이 높을수록 노이즈 평활화를 위해 더 많은 블러를 생성합니다.',
@@ -74,7 +75,14 @@ export default {
 
   // Sampling mode
   samplingMode: {
+    mode: '처리 모드',
     title: '샘플링 모드',
+    energyMode: '에너지 알고리즘 모드',
+    energyModeDesc: '픽셀화를 위해 에너지 알고리즘 사용, 여러 샘플링 방법 지원',
+    directSamplingMode: '직접 비례 샘플링',
+    directSamplingModeDesc: '픽셀 아트를 생성하기 위한 직접 비례 그리드 샘플링',
+    pureUpscaleMode: '순수 업스케일',
+    pureUpscaleModeDesc: '픽셀화 없이 순수 이미지 업스케일',
     generatePixelArt: '픽셀 아트 생성',
     generatePixelArtDesc: '활성화된 경우 감지된 그리드를 기반으로 픽셀 아트를 생성합니다. 비활성화된 경우 에너지 맵만 표시합니다.',
     directProportionalSampling: '직접 비례 샘플링 (일반 이미지용)',
@@ -89,6 +97,8 @@ export default {
     upscaleFactor: '업스케일 계수',
     upscaleFactorDesc: '출력 이미지 스케일링 계수로, 자동 계산을 위해 0으로 설정하세요.',
     auto: '자동',
+    native: '네이티브',
+    upscaleParams: '업스케일 계수',
     weightedRatio: '가중 비율',
     weightedRatioDesc: '가중 평균 샘플링을 위한 중심점 가중 비율로, 값이 높을수록 중심 픽셀을 더 강조합니다.',
     directSamplingParams: '직접 샘플링 매개변수',

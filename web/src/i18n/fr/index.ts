@@ -97,6 +97,7 @@ export default {
   // Paramètres de pixelisation
   pixelParams: {
     title: 'Paramètres de pixelisation',
+    pixelSizeParams: 'Paramètres de taille de pixel',
     energyAlgorithmParams: 'Paramètres de l\'algorithme d\'énergie',
     gaussianBlur: 'Flou gaussien (σ)',
     gaussianBlurDesc: 'Contrôle le degré de flou de l\'image, plus la valeur est élevée, plus le flou est fort, utilisé pour lisser le bruit',
@@ -130,7 +131,14 @@ export default {
 
   // Mode d'échantillonnage
   samplingMode: {
+    mode: 'Mode de traitement',
     title: 'Mode d\'échantillonnage',
+    energyMode: 'Mode d\'algorithme d\'énergie',
+    energyModeDesc: 'Utiliser l\'algorithme d\'énergie pour la pixelisation, prend en charge plusieurs méthodes d\'échantillonnage',
+    directSamplingMode: 'Échantillonnage Proportionnel Direct',
+    directSamplingModeDesc: 'Échantillonnage proportionnel direct de la grille pour générer du pixel art',
+    pureUpscaleMode: 'Upscale Pur',
+    pureUpscaleModeDesc: 'Mettre à l\'échelle l\'image pure sans pixelisation',
     generatePixelArt: 'Générer du pixel art',
     generatePixelArtDesc: 'Activé, génère du pixel art à partir de la grille détectée. Désactivé, affiche uniquement la carte d\'énergie',
     directProportionalSampling: 'Échantillonnage proportionnel direct (pour images normales)',
@@ -145,6 +153,8 @@ export default {
     upscaleFactor: 'Facteur d\'agrandissement',
     upscaleFactorDesc: 'Facteur d\'agrandissement de l\'image de sortie, défini sur 0 pour calcul automatique du meilleur facteur',
     auto: 'Auto',
+    native: 'Natif',
+    upscaleParams: 'Facteur d\'agrandissement',
     weightedRatio: 'Ratio de pondération',
     weightedRatioDesc: 'Ratio de pondération du point central lors de l\'échantillonnage moyen pondéré, plus la valeur est élevée, plus le pixel central est privilégié',
     directSamplingParams: 'Paramètres d\'échantillonnage direct',

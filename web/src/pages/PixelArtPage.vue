@@ -48,19 +48,44 @@
               size="lg"
             />
 
-            <!-- 像素化参数 (纯比例放大模式下隐藏) -->
+            <!-- 模式选择 -->
+            <div class="text-subtitle2 q-mb-md">{{ $t('samplingMode.mode') || '处理模式' }}</div>
+            <q-option-group
+              v-model="processingMode"
+              :options="processingModeOptions"
+              color="primary"
+              class="q-mb-md"
+            >
+              <template v-slot:label="opt">
+                <div class="row items-center">
+                  <div>{{ opt.label }}</div>
+                  <q-icon
+                    name="help"
+                    size="xs"
+                    color="primary"
+                    class="q-ml-xs cursor-pointer"
+                  >
+                    <q-tooltip>{{ opt.description }}</q-tooltip>
+                  </q-icon>
+                </div>
+              </template>
+            </q-option-group>
+
+            <!-- WASM 加速设置 -->
+            <WasmSettings />
+
+            <!-- 能量算法参数 (仅在能量算法模式下显示) -->
             <q-expansion-item
-              v-if="!pureUpscaleMode"
+              v-if="processingMode === 'energy'"
               :label="$t('pixelParams.title')"
               default-opened
               class="q-mb-md"
             >
               <q-card flat bordered class="q-pa-md">
-                <!-- 能量算法参数（仅在非直接采样模式时显示） -->
-                <template v-if="!useDirectSampling">
-                  <div class="text-subtitle2 q-mb-md">{{ $t('pixelParams.energyAlgorithmParams') }}</div>
+                <!-- 能量算法参数 -->
+                <div class="text-subtitle2 q-mb-md">{{ $t('pixelParams.energyAlgorithmParams') }}</div>
 
-                  <!-- 基础参数 -->
+                <!-- 基础参数 -->
                   <div class="q-mb-md">
                     <div class="text-body2 q-mb-sm">
                       {{ $t('pixelParams.gaussianBlur') }}: {{ params.sigma.toFixed(1) }}
@@ -210,7 +235,6 @@
                     </div>
                   </template>
                 </template>
-              </template>
 
                 <!-- 像素大小检测 -->
                 <div class="q-mb-md">
@@ -265,39 +289,26 @@
                   </div>
                 </template>
 
-                <!-- 采样模式选择 -->
-                <div class="text-subtitle2 q-mb-md">{{ $t('samplingMode.title') }}</div>
 
-                <q-toggle
-                  v-model="params.sample"
-                  class="q-mb-md"
-                >
-                  <template v-slot:default>
-                    <span class="flex items-center">
-                      {{ $t('samplingMode.generatePixelArt') }}
-                      <q-icon name="help" size="xs" color="primary" class="cursor-pointer q-ml-xs">
-                        <q-tooltip>{{ $t('samplingMode.generatePixelArtDesc') }}</q-tooltip>
-                      </q-icon>
-                    </span>
-                  </template>
-                </q-toggle>
+                <!-- 采样模式选择 (仅在能量算法模式下显示) -->
+                <template v-if="processingMode === 'energy'">
+                  <div class="text-subtitle2 q-mb-md">{{ $t('samplingMode.title') }}</div>
 
-                <template v-if="params.sample">
                   <q-toggle
-                    v-model="useDirectSampling"
+                    v-model="params.sample"
                     class="q-mb-md"
                   >
                     <template v-slot:default>
                       <span class="flex items-center">
-                        {{ $t('samplingMode.directProportionalSampling') }}
+                        {{ $t('samplingMode.generatePixelArt') }}
                         <q-icon name="help" size="xs" color="primary" class="cursor-pointer q-ml-xs">
-                          <q-tooltip>{{ $t('samplingMode.directProportionalSamplingDesc') }}</q-tooltip>
+                          <q-tooltip>{{ $t('samplingMode.generatePixelArtDesc') }}</q-tooltip>
                         </q-icon>
                       </span>
                     </template>
                   </q-toggle>
 
-                  <template v-if="!useDirectSampling">
+                  <template v-if="params.sample">
                     <div class="q-mb-md">
                       <div class="text-body2 q-mb-sm">
                         {{ $t('samplingMode.energyMapSampling') }}
@@ -364,28 +375,13 @@
                       />
                     </div>
                   </template>
-
-                  <template v-if="useDirectSampling">
-                    <q-separator class="q-my-md" />
-                    <div class="text-subtitle2 q-mb-md">{{ $t('samplingMode.directSamplingParams') }}</div>
-
-                    <q-banner class="bg-grey-2 text-grey-8 q-mb-md">
-                      <template v-slot:avatar>
-                        <q-icon name="info" />
-                      </template>
-                      {{ $t('samplingMode.directSamplingDescription') }}
-                    </q-banner>
-                  </template>
                 </template>
               </q-card>
             </q-expansion-item>
 
-            <!-- WASM 加速设置 -->
-            <WasmSettings />
-
             <!-- 显示调试信息 - 只在能量算法模式下显示 -->
             <q-toggle
-              v-if="!pureUpscaleMode && !useDirectSampling"
+              v-if="processingMode === 'energy'"
               v-model="showDebug"
               class="q-mb-md"
             >
@@ -399,23 +395,8 @@
               </template>
             </q-toggle>
 
-            <!-- 纯比例放大模式 -->
-            <q-toggle
-              v-model="pureUpscaleMode"
-              class="q-mb-md"
-            >
-              <template v-slot:default>
-                <span class="flex items-center">
-                  {{ $t('actions.pureUpscaleMode') }}
-                  <q-icon name="help" size="xs" color="primary" class="cursor-pointer q-ml-xs">
-                    <q-tooltip>{{ $t('actions.pureUpscaleModeDesc') }}</q-tooltip>
-                  </q-icon>
-                </span>
-              </template>
-            </q-toggle>
-
-            <!-- 纯比例放大倍数 -->
-            <div v-if="pureUpscaleMode" class="q-mb-md">
+            <!-- 纯比例放大倍数 (仅在纯比例放大模式下显示) -->
+            <div v-if="processingMode === 'pureUpscale'" class="q-mb-md">
               <div class="text-body2 q-mb-sm">
                 {{ $t('samplingMode.upscaleFactor') }}: {{ pureUpscaleFactor }}x
               </div>
@@ -427,6 +408,79 @@
                 label
               />
             </div>
+
+            <!-- 直接采样模式参数面板 -->
+            <q-expansion-item
+              v-if="processingMode === 'directSampling'"
+              :label="$t('pixelParams.title')"
+              default-opened
+              class="q-mb-md"
+            >
+              <q-card flat bordered class="q-pa-md">
+                <!-- 像素大小检测 -->
+                <div class="text-subtitle2 q-mb-md">{{ $t('pixelParams.pixelSizeParams') || '像素大小参数' }}</div>
+
+                <div class="q-mb-md">
+                  <div class="text-body2 q-mb-sm">
+                    {{ $t('pixelParams.pixelSize') }}:
+                    <span>{{ params.pixelSize || 8 }}px ({{ $t('pixelParams.manualSet') }})</span>
+                    <q-icon name="help" size="xs" color="primary" class="cursor-pointer">
+                      <q-tooltip>{{ $t('pixelParams.pixelSizeDesc') }}</q-tooltip>
+                    </q-icon>
+                  </div>
+                  <q-slider
+                    v-model="params.pixelSize"
+                    :min="1"
+                    :max="50"
+                    label
+                    class="q-mb-md"
+                  />
+                </div>
+
+                <!-- 直接采样说明 -->
+                <q-banner class="bg-grey-2 text-grey-8 q-mb-md">
+                  <template v-slot:avatar>
+                    <q-icon name="info" />
+                  </template>
+                  {{ $t('samplingMode.directSamplingDescription') }}
+                </q-banner>
+
+                <!-- 放大倍数参数 -->
+                <div class="text-subtitle2 q-mb-md">{{ $t('samplingMode.upscaleParams') || '放大倍数' }}</div>
+
+                <q-toggle
+                  v-model="params.nativeRes"
+                  class="q-mb-md"
+                >
+                  <template v-slot:default>
+                    <span class="flex items-center">
+                      {{ $t('samplingMode.nativeResolution') }}
+                      <q-icon name="help" size="xs" color="primary" class="cursor-pointer q-ml-xs">
+                        <q-tooltip>{{ $t('samplingMode.nativeResolutionDesc') }}</q-tooltip>
+                      </q-icon>
+                    </span>
+                  </template>
+                </q-toggle>
+
+                <template v-if="!params.nativeRes">
+                  <div class="q-mb-md">
+                    <div class="text-body2 q-mb-sm">
+                      {{ $t('samplingMode.upscaleFactor') }}: {{ params.upscale === 0 ? $t('samplingMode.auto') : params.upscale }}
+                      <q-icon name="help" size="xs" color="primary" class="cursor-pointer">
+                        <q-tooltip>{{ $t('samplingMode.upscaleFactorDesc') }}</q-tooltip>
+                      </q-icon>
+                    </div>
+                    <q-slider
+                      v-model="params.upscale"
+                      :min="0"
+                      :max="10"
+                      label
+                      class="q-mb-md"
+                    />
+                  </div>
+                </template>
+              </q-card>
+            </q-expansion-item>
 
             <!-- 状态信息 -->
             <div v-if="result" class="text-body2 text-grey-7">
@@ -469,7 +523,7 @@
           </div>
 
           <!-- 纯能量图（调试模式） - 只在能量算法模式下显示 -->
-          <div v-if="showDebug && result && !pureUpscaleMode && !useDirectSampling" class="image-card">
+          <div v-if="showDebug && result && processingMode === 'energy'" class="image-card">
             <q-card>
               <q-card-section>
                 <div class="text-h6 q-mb-md">{{ $t('title.pureEnergyMap') }}</div>
@@ -481,7 +535,7 @@
           </div>
 
           <!-- 能量图和网格线（调试模式） - 只在能量算法模式下显示 -->
-          <div v-if="showDebug && result && !pureUpscaleMode && !useDirectSampling" class="image-card">
+          <div v-if="showDebug && result && processingMode === 'energy'" class="image-card">
             <q-card>
               <q-card-section>
                 <div class="text-h6 q-mb-md">{{ $t('title.energyMapWithGrid') }}</div>
@@ -515,7 +569,7 @@
                       @click="downloadEnergy"
                       icon="download"
                       class="download-btn"
-                      v-if="showDebug && !pureUpscaleMode && !useDirectSampling"
+                      v-if="showDebug && processingMode === 'energy'"
                     />
                     <q-btn
                       color="secondary"
@@ -523,7 +577,7 @@
                       @click="downloadDebug"
                       icon="download"
                       class="download-btn"
-                      v-if="showDebug && !pureUpscaleMode && !useDirectSampling"
+                      v-if="showDebug && processingMode === 'energy'"
                     />
                     <q-btn
                       color="secondary"
@@ -623,6 +677,48 @@ const preprocessInterpFactor = ref(1);
 const pureUpscaleMode = ref(false);
 const pureUpscaleFactor = ref(4);
 
+// 处理模式选择器
+type ProcessingMode = 'energy' | 'directSampling' | 'pureUpscale';
+
+const processingMode = ref<ProcessingMode>('energy');
+
+const processingModeOptions = computed(() => [
+  {
+    value: 'energy',
+    label: t('samplingMode.energyMode') || '能量算法模式',
+    description: t('samplingMode.energyModeDesc') || '使用能量算法进行像素化处理，支持多种采样方式'
+  },
+  {
+    value: 'directSampling',
+    label: t('samplingMode.directSamplingMode') || '直接按比例采样',
+    description: t('samplingMode.directSamplingModeDesc') || '直接按比例网格采样，生成像素画'
+  },
+  {
+    value: 'pureUpscale',
+    label: t('samplingMode.pureUpscaleMode') || '纯比例放大',
+    description: t('samplingMode.pureUpscaleModeDesc') || '纯比例放大图片，不做像素化处理'
+  }
+]);
+
+// 监听处理模式变化，同步更新相关变量
+watch(processingMode, (newMode) => {
+  if (newMode === 'energy') {
+    pureUpscaleMode.value = false;
+    useDirectSampling.value = false;
+    params.sample = true;
+  } else if (newMode === 'directSampling') {
+    pureUpscaleMode.value = false;
+    useDirectSampling.value = true;
+    params.sampleMode = 'direct';
+    if (params.pixelSize === 0) {
+      params.pixelSize = 8;
+    }
+  } else if (newMode === 'pureUpscale') {
+    pureUpscaleMode.value = true;
+    useDirectSampling.value = false;
+  }
+});
+
 // 能量算法参数
 const params = reactive<PipelineParams>({
   wasmEnabled: false,
@@ -654,22 +750,6 @@ const sampleModeOptions = computed(() => [
   { label: t('samplingMode.directProportionalSampling'), value: 'direct' },
 ]);
 
-// 监听直接采样模式切换
-watch(useDirectSampling, (newValue) => {
-  if (newValue) {
-    params.sampleMode = 'direct';
-    // 切换到直接采样模式时，设置默认像素大小
-    if (params.pixelSize === 0) {
-      params.pixelSize = 8;
-    }
-  } else {
-    // 切换回其他模式时，默认选择中心采样
-    if (params.sampleMode === 'direct') {
-      params.sampleMode = 'center';
-    }
-  }
-});
-
 // Watch for all parameter changes and save to localStorage
 watch(
   [
@@ -695,6 +775,7 @@ watch(
     preprocessInterpFactor,
     pureUpscaleMode,
     pureUpscaleFactor,
+    processingMode,
   ],
   () => {
     // Debounced save to avoid excessive writes
@@ -727,6 +808,7 @@ watch(
         preprocessInterpFactor: preprocessInterpFactor.value,
         pureUpscaleMode: pureUpscaleMode.value,
         pureUpscaleFactor: pureUpscaleFactor.value,
+        processingMode: processingMode.value,
       } as const;
       storageService.savePixelSettings(pixelSettings);
       console.log('Settings saved:', pixelSettings);
@@ -776,6 +858,20 @@ onMounted(() => {
     preprocessInterpFactor.value = savedPixelSettings.preprocessInterpFactor || 1;
     pureUpscaleMode.value = savedPixelSettings.pureUpscaleMode || false;
     pureUpscaleFactor.value = savedPixelSettings.pureUpscaleFactor || 4;
+
+    // 优先使用保存的处理模式，如果没有则根据旧方式推断
+    if (savedPixelSettings.processingMode) {
+      processingMode.value = savedPixelSettings.processingMode;
+    } else {
+      // 兼容旧版本：根据保存的设置确定处理模式
+      if (pureUpscaleMode.value) {
+        processingMode.value = 'pureUpscale';
+      } else if (useDirectSampling.value) {
+        processingMode.value = 'directSampling';
+      } else {
+        processingMode.value = 'energy';
+      }
+    }
 
     console.log('Loaded saved settings:', savedPixelSettings);
   }

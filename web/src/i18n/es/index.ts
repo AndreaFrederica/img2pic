@@ -41,6 +41,7 @@ export default {
   // Pixelization parameters
   pixelParams: {
     title: 'Parámetros de Pixelización',
+    pixelSizeParams: 'Parámetros de Tamaño de Píxel',
     energyAlgorithmParams: 'Parámetros del Algoritmo de Energía',
     gaussianBlur: 'Desenfoque Gaussiano (σ)',
     gaussianBlurDesc: 'Controla el nivel de desenfoque de la imagen, valores más altos crean más desenfoque para suavizar el ruido',
@@ -74,7 +75,14 @@ export default {
 
   // Sampling mode
   samplingMode: {
+    mode: 'Modo de Procesamiento',
     title: 'Modo de Muestreo',
+    energyMode: 'Modo de Algoritmo de Energía',
+    energyModeDesc: 'Usar algoritmo de energía para pixelización, soporta múltiples métodos de muestreo',
+    directSamplingMode: 'Muestreo Proporcional Directo',
+    directSamplingModeDesc: 'Muestreo proporcional directo de cuadrícula para generar arte píxel',
+    pureUpscaleMode: 'Escalado Puro',
+    pureUpscaleModeDesc: 'Escalar imagen pura sin pixelización',
     generatePixelArt: 'Generar Arte Píxel',
     generatePixelArtDesc: 'Cuando está habilitado, genera arte píxel basado en cuadrículas detectadas; cuando está deshabilitado, solo muestra el mapa de energía',
     directProportionalSampling: 'Muestreo Proporcional Directo (para imágenes normales)',
@@ -89,6 +97,8 @@ export default {
     upscaleFactor: 'Factor de Escalado',
     upscaleFactorDesc: 'Factor de escalado de imagen de salida, establecer en 0 para cálculo automático',
     auto: 'Automático',
+    native: 'Nativo',
+    upscaleParams: 'Factor de Escalado',
     weightedRatio: 'Relación Ponderada',
     weightedRatioDesc: 'Relación de peso del punto central para muestreo de promedio ponderado, valores más altos enfatizan más los píxeles centrales',
     directSamplingParams: 'Parámetros de Muestreo Directo',

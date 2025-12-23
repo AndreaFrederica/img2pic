@@ -41,6 +41,7 @@ export default {
   // Pixelization parameters
   pixelParams: {
     title: 'Pixelization Parameters',
+    pixelSizeParams: 'Pixel Size Parameters',
     energyAlgorithmParams: 'Energy Algorithm Parameters',
     gaussianBlur: 'Gaussian Blur (σ)',
     gaussianBlurDesc: 'Controls image blur level, higher values create more blur for noise smoothing',
@@ -74,7 +75,14 @@ export default {
 
   // Sampling mode
   samplingMode: {
+    mode: 'Processing Mode',
     title: 'Sampling Mode',
+    energyMode: 'Energy Algorithm Mode',
+    energyModeDesc: 'Use energy algorithm for pixelization, supports multiple sampling methods',
+    directSamplingMode: 'Direct Proportional Sampling',
+    directSamplingModeDesc: 'Direct proportional grid sampling to generate pixel art',
+    pureUpscaleMode: 'Pure Upscale',
+    pureUpscaleModeDesc: 'Pure upscale the image without pixelization',
     generatePixelArt: 'Generate Pixel Art',
     generatePixelArtDesc: 'When enabled, generates pixel art based on detected grids; when disabled, only shows energy map',
     directProportionalSampling: 'Direct Proportional Sampling (for normal images)',
@@ -86,8 +94,10 @@ export default {
     weightedAverage: 'Weighted Average',
     nativeResolution: 'Native Resolution (1 pixel = 1 grid)',
     nativeResolutionDesc: 'Output image where each pixel corresponds to one grid cell, no scaling applied',
+    native: 'Native',
     upscaleFactor: 'Upscale Factor',
     upscaleFactorDesc: 'Output image scaling factor, set to 0 for automatic calculation',
+    upscaleParams: 'Upscale Factor',
     auto: 'Auto',
     weightedRatio: 'Weighted Ratio',
     weightedRatioDesc: 'Center point weight ratio for weighted average sampling, higher values emphasize center pixels more',

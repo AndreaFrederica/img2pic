@@ -41,6 +41,7 @@ export default {
   // Pixelization parameters
   pixelParams: {
     title: 'Pixelisierungsparameter',
+    pixelSizeParams: 'Pixelgrößenparameter',
     energyAlgorithmParams: 'Parameter des Energiealgorithmus',
     gaussianBlur: 'Gaußscher Weichzeichner (σ)',
     gaussianBlurDesc: 'Steuert den Unschärfegrad des Bildes, höhere Werte erzeugen mehr Unschärfe zur Rauschunterdrückung',
@@ -74,7 +75,14 @@ export default {
 
   // Sampling mode
   samplingMode: {
+    mode: 'Verarbeitungsmodus',
     title: 'Abtastmodus',
+    energyMode: 'Energiealgorithmus-Modus',
+    energyModeDesc: 'Energiealgorithmus für Pixelisierung verwenden, unterstützt mehrere Abtastmethoden',
+    directSamplingMode: 'Direkte Proportionale Abtastung',
+    directSamplingModeDesc: 'Direkte proportionale Gitterabtastung zur Generierung von Pixel-Art',
+    pureUpscaleMode: 'Reines Upscaling',
+    pureUpscaleModeDesc: 'Bild rein hochskalieren ohne Pixelisierung',
     generatePixelArt: 'Pixel-Art generieren',
     generatePixelArtDesc: 'Wenn aktiviert, generiert Pixel-Art basierend auf erkannten Gittern; wenn deaktiviert, zeigt nur die Energiekarte',
     directProportionalSampling: 'Direkt proportionale Abtastung (für normale Bilder)',
@@ -89,6 +97,8 @@ export default {
     upscaleFactor: 'Skalierungsfaktor',
     upscaleFactorDesc: 'Skalierungsfaktor für Ausgabebild, auf 0 für automatische Berechnung einstellen',
     auto: 'Automatisch',
+    native: 'Nativ',
+    upscaleParams: 'Skalierungsfaktor',
     weightedRatio: 'Gewichtungsverhältnis',
     weightedRatioDesc: 'Gewichtsverhältnis des Mittelpunkts für gewichtete Durchschnittsabtastung, höhere Werte betonen Mittelpixel stärker',
     directSamplingParams: 'Parameter der direkten Abtastung',

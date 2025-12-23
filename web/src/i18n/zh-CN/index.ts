@@ -97,6 +97,7 @@ export default {
   // 像素化参数
   pixelParams: {
     title: '像素化参数',
+    pixelSizeParams: '像素大小参数',
     energyAlgorithmParams: '能量算法参数',
     gaussianBlur: '高斯模糊 (σ)',
     gaussianBlurDesc: '控制图像模糊程度，值越大越模糊，用于平滑噪声',
@@ -130,7 +131,14 @@ export default {
 
   // 采样模式
   samplingMode: {
+    mode: '处理模式',
     title: '采样模式',
+    energyMode: '能量算法模式',
+    energyModeDesc: '使用能量算法进行像素化处理，支持多种采样方式',
+    directSamplingMode: '直接按比例采样',
+    directSamplingModeDesc: '直接按比例网格采样，生成像素画',
+    pureUpscaleMode: '纯比例放大',
+    pureUpscaleModeDesc: '纯比例放大图片，不做像素化处理',
     generatePixelArt: '生成像素画',
     generatePixelArtDesc: '启用后将根据检测到的网格生成像素画，关闭则只显示能量图',
     directProportionalSampling: '直接按比例采样（适用于普通图片）',
@@ -142,8 +150,10 @@ export default {
     weightedAverage: '加权平均',
     nativeResolution: '原生分辨率 (1像素=1格)',
     nativeResolutionDesc: '输出图像的每个像素对应一个网格，不进行放大',
+    native: '原生',
     upscaleFactor: '放大倍数',
     upscaleFactorDesc: '输出图像的放大倍数，设置为0时自动计算最佳倍数',
+    upscaleParams: '放大倍数',
     auto: '自动',
     weightedRatio: '加权比例',
     weightedRatioDesc: '加权平均采样时的中心点权重比例，值越大越重视中心像素',

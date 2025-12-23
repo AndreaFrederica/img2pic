@@ -104,6 +104,7 @@ export default {
   // ピクセル化パラメータ
   pixelParams: {
     title: '画素化参数',
+    pixelSizeParams: '画素寸法参数',
     energyAlgorithmParams: 'エネルギー算法参数',
     gaussianBlur: '高斯ぼかし (σ)',
     gaussianBlurDesc:
@@ -143,7 +144,14 @@ export default {
 
   // サンプリングモード
   samplingMode: {
+    mode: '処理模式',
     title: '抽出方式',
+    energyMode: 'エネルギー算法模式',
+    energyModeDesc: 'エネルギー算法ヲ用イテ画素化処理ヲ行イマス。複数ノ抽出方式ニ対応',
+    directSamplingMode: '直接比例抽出',
+    directSamplingModeDesc: '直接比例格子抽出ニテ画素芸術ヲ生成',
+    pureUpscaleMode: '純粋拡大',
+    pureUpscaleModeDesc: '画像ヲ純粋ニ拡大シ、画素化処理ハ行イマセン',
     generatePixelArt: '画素芸術生成',
     generatePixelArtDesc:
       '有効時は検出した格子に基づいて画素芸術を生成します。無効時はエネルギー地図のみを表示します。',
@@ -163,6 +171,8 @@ export default {
     upscaleFactorDesc:
       '出力画像の拡大倍率です。0 の場合は最適倍率を自動計算します。',
     auto: '自動',
+    native: '原',
+    upscaleParams: '拡大倍率',
     weightedRatio: '加重比率',
     weightedRatioDesc:
       '加重平均時の中心重み比率です。値が大きいほど中心画素を重視します。',
