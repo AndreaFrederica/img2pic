@@ -709,7 +709,6 @@ watch(processingMode, (newMode) => {
   } else if (newMode === 'directSampling') {
     pureUpscaleMode.value = false;
     useDirectSampling.value = true;
-    params.sampleMode = 'direct';
     if (params.pixelSize === 0) {
       params.pixelSize = 8;
     }
@@ -1013,7 +1012,9 @@ async function processImage() {
     // 将 reactive params 转换为普通对象
     const plainParams = {
       ...JSON.parse(JSON.stringify(params)),
-      wasmEnabled: settingsStore.wasmEnabled
+      wasmEnabled: settingsStore.wasmEnabled,
+      // 根据处理模式动态设置采样方式，不修改原始 params
+      sampleMode: processingMode.value === 'directSampling' ? 'direct' : params.sampleMode
     };
 
     console.log('Input data:', {
